@@ -167,6 +167,7 @@ One line per slice: `<what I did> -> <the command I ran> -> <what it actually pr
 - Renamed the display name "Inverbrass" -> "Inverbras" everywhere (app name, shell, login, health, docs, comments; package name `inverbras-crm`) -> `Select-String src -Pattern Inverbrass` -> 0 capital occurrences. The demo logins keep `@inverbrass.demo` and password `Inverbrass#2026` because those accounts exist in Supabase auth and renaming them would break sign-in.
 - Diagnosed the live 500 -> `curl https://inverbrass.vercel.app/health` -> the page reports `NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY` missing (`no`); `SUPABASE_SERVICE_ROLE_KEY` present. Added `src/app/error.tsx` so this shows a message that links to `/health` instead of a blank error.
 - Checks -> `npm run typecheck` clean, `npm run lint` clean, `npm run build` -> `✓ Compiled successfully`; `/login` renders the logo and "Inverbras".
+- Member said the drawn logo was wrong. Searched disk for the attached image -> not present (attachments are not saved to an accessible path), so the exact bytes cannot be copied. Redrew the SVG closer to the reference: correct pointy-top hexagon, white inner hexagon with a gold border, mirrored serif "E" monogram, heavy navy wordmark -> `[xml]` parse OK and `/logo.svg`, `/logo-mark.svg` -> `200`. To use the exact artwork, overwrite `public/logo.svg` (or supply `public/logo.png` and switch one line in `src/components/brand.tsx`).
 
 ## Final verification
 
