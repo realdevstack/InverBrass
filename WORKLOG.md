@@ -154,6 +154,13 @@ One line per slice: `<what I did> -> <the command I ran> -> <what it actually pr
 - Process flow page showing Sheet1's nine stages, the linking key, the gate and live record counts -> `/process`; `node scripts/verify-page.mjs` -> `/process HTTP 200 contains "Order management stages": true`; `node scripts/verify-roles.mjs` -> every role loads it (`Process flow` in each menu, 10-17 pages OK).
 - Full checks -> `npm test` -> `Tests 62 passed`; `npm run build` -> `✓ Compiled successfully`.
 
+## Vibrant theme, GitHub push, Vercel attempt (26 Sep)
+
+- Member: colours looked dull/dark. Reworked the theme to a light, vibrant look -> `globals.css` (purple-indigo + violet gradient primary, cyan/amber/green/rose status, soft card shadows, gradient nav active state, light rail) and `app-shell.tsx` / `nav-links.tsx` (light rail, brand gradient chip) -> `npm run build` -> `✓ Compiled successfully`.
+- Git + GitHub -> `git init -b main`, `git add -A`, commit `341d0d8`, `git remote add origin https://github.com/realdevstack/InverBrass.git`, `gh auth setup-git`, `git push -u origin main` -> `* [new branch] main -> main`. `gh repo view realdevstack/InverBrass` -> default branch `main`, pushedAt `2026-09-26T18:49:08Z`.
+- Secret check -> `git ls-files | Select-String .env` -> only `.env.example`; `grep supabase/admin src` -> imported only by `admin/actions.ts` and `admin/users/page.tsx` (both server-side), so the service-role key never reaches the browser.
+- Vercel -> `npx --yes vercel@latest whoami` -> `Error: Worker timed out after 10 seconds`; no `~/.vercel/auth.json` and no `VERCEL_TOKEN`, so the CLI cannot log in from here. BLOCKED; dashboard import steps and the env-var list recorded in `REPORT.md`.
+
 ## Final verification
 
 - `npm run typecheck` -> no output (clean).

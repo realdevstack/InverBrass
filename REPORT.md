@@ -79,6 +79,30 @@ Checked field by field against the live schema (`information_schema.columns`, 26
 
 Master Data Inputs: Customer Master (14 fields + multiple contacts), OEM Master (16 fields + contacts + certification expiry), Product/Part Master (14 fields incl. HSN, compliance certifications, shelf life, export restriction, standard price, currency) — all present. Competitor Data has no fields in the sheet, so nothing was built.
 
+## Deployment
+
+### GitHub — DONE
+- Pushed `main` to https://github.com/realdevstack/InverBrass.
+- evidence: `git push -u origin main` -> `* [new branch] main -> main`; `gh repo view realdevstack/InverBrass` -> `defaultBranchRef main`, `pushedAt 2026-09-26T18:49:08Z`; `git ls-remote --heads origin` -> `341d0d8… refs/heads/main`.
+- `.env.local` is not committed (gitignored); only `.env.example` is tracked. Verified with `git ls-files | grep .env`.
+
+### Vercel — BLOCKED from this machine (needs the member's login)
+```
+BLOCKED: create the Vercel project and deploy
+  Tried:      npx --yes vercel@latest whoami
+  Got:        Error: Worker timed out after 10 seconds (no stored credentials: %USERPROFILE%\.vercel\auth.json absent; VERCEL_TOKEN unset)
+  Wall:       Vercel auth is an interactive device/browser login that cannot be completed from here, and no token was provided.
+  To unblock: import the repo in the Vercel dashboard (below) or run `vercel login` + `vercel --prod` on a machine the member controls.
+```
+Import settings: Framework preset **Next.js**, root directory **repo root**, build `next build`, install `npm install`.
+Environment variables (copy values from `.env.local`; never commit them):
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY` (server-only; required for `/admin/users`)
+- optional `AI_ASSISTANT_API_KEY`, `AI_ASSISTANT_BASE_URL`, `AI_ASSISTANT_MODEL`
+- **not** needed on Vercel: `SUPABASE_DB_URL` (that is only for running migrations from a machine).
+After the first deploy, add the Vercel URL to Supabase → Authentication → URL Configuration so future emailed links point at the live site.
+
 ## Validation limits
 
 - **Playwright is not installed or run.** TECH-STACK.md permits dropping it if it becomes a burden. The sign-in and page-render path is instead proven by `scripts/verify-page.mjs` (real Supabase password sign-in, real HTTP fetches, `ALL PAGES OK`), and the approval / PO / PDI / commission gates are proven by the SQL tests.
@@ -145,6 +169,11 @@ BLOCKED: supabase db diff (migration-drift check)
 | Lint | `npm run lint` | clean |
 | Typecheck | `npm run typecheck` | clean |
 | Production build | `npm run build` | `✓ Compiled successfully`, 40 routes (incl. `/process`) |
+| Vibrant theme builds | `npm run build` | `✓ Compiled successfully` after the light/vibrant redesign |
+| GitHub push | `git push -u origin main` | `* [new branch] main -> main`; remote head `341d0d8` |
+| No secret committed | `git ls-files \| grep .env` | only `.env.example`; no `.env.local` |
+| Service key is server-only | grep `supabase/admin` | imported only by `admin/actions.ts` and `admin/users/page.tsx` (both server) |
+| Vercel deploy | `npx vercel whoami` | BLOCKED — interactive login; see Deployment |
 | Reports grouped Sales/Operational/Financial | `node scripts/verify-page.mjs` | `/reports` contains all three group headings |
 | Master data seeded and linked | `node scripts/verify-steps.mjs` | `customers 3, products 4, requirements_linked_customer 4, lines_linked_product 4, pos_linked_customer 1` |
 | Sheet1 stage flow page | `node scripts/verify-page.mjs` | `/process` → "Order management stages", live counts, gates |
