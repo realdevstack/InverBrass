@@ -103,6 +103,10 @@ Environment variables (copy values from `.env.local`; never commit them):
 - **not** needed on Vercel: `SUPABASE_DB_URL` (that is only for running migrations from a machine).
 After the first deploy, add the Vercel URL to Supabase → Authentication → URL Configuration so future emailed links point at the live site.
 
+Vercel flags `NEXT_PUBLIC_*` variables ("remove the public prefix to keep this value private"). For these two it is a false alarm, and the prefix is required: Next.js only exposes `NEXT_PUBLIC_*` to the browser, and the Supabase browser client needs both names.
+- evidence: key classification -> `NEXT_PUBLIC_SUPABASE_ANON_KEY = publishable key (browser-safe by design)`, `SUPABASE_SERVICE_ROLE_KEY = secret key (server-only)`; `public tables: 24, tables WITHOUT row level security: 0`.
+- Action: keep both `NEXT_PUBLIC_` names and set them as **Config / plain** (not Sensitive). Mark only `SUPABASE_SERVICE_ROLE_KEY` as **Sensitive**.
+
 ## Validation limits
 
 - **Playwright is not installed or run.** TECH-STACK.md permits dropping it if it becomes a burden. The sign-in and page-render path is instead proven by `scripts/verify-page.mjs` (real Supabase password sign-in, real HTTP fetches, `ALL PAGES OK`), and the approval / PO / PDI / commission gates are proven by the SQL tests.
