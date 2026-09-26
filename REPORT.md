@@ -185,7 +185,7 @@ BLOCKED: supabase db diff (migration-drift check)
 | Vercel deploy | `npx vercel whoami` | BLOCKED — interactive login; deploy done from the dashboard by the member |
 | Live 500 root cause | `curl https://inverbrass.vercel.app/health` | page reports `NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY` missing |
 | Brand rename | `Select-String src -Pattern Inverbrass` | 0 capital occurrences (only `@inverbrass.demo` demo logins kept) |
-| Logo assets served | `curl -o NUL -w %{http_code} /logo.svg` | `logo.svg=200`, `logo-mark.svg=200` |
+| Logo assets served | `curl -o NUL -w %{http_code}` | `/Inverbras-logo.jpg=200`, `/logo-mark.png=200`; `/login` renders the real JPG via `/_next/image` |
 | Reports grouped Sales/Operational/Financial | `node scripts/verify-page.mjs` | `/reports` contains all three group headings |
 | Master data seeded and linked | `node scripts/verify-steps.mjs` | `customers 3, products 4, requirements_linked_customer 4, lines_linked_product 4, pos_linked_customer 1` |
 | Sheet1 stage flow page | `node scripts/verify-page.mjs` | `/process` → "Order management stages", live counts, gates |

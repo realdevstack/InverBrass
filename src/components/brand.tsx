@@ -1,22 +1,22 @@
 import Image from "next/image";
 
 /**
- * Brand assets. `public/logo.svg` is the full lockup and `public/logo-mark.svg`
- * is the compact hexagon used in the navigation rail. Replace either file with
- * the exact artwork if the drawn version is not wanted; the components need no
- * change.
+ * Brand assets, taken from the member's artwork.
+ *   public/Inverbras-logo.jpg  — the full lockup (hexagon + wordmark)
+ *   public/logo-mark.png       — the hexagon cropped out for the nav rail
+ * Replace either file to update the logo; the components need no change.
  */
-export function BrandMark({ className = "h-8 w-8" }: { className?: string }) {
-  return <Image src="/logo-mark.svg" alt="Inverbras" width={32} height={32} className={className} priority />;
+export function BrandMark({ className = "h-8 w-auto" }: { className?: string }) {
+  return <Image src="/logo-mark.png" alt="Inverbras" width={26} height={32} className={className} priority />;
 }
 
 export function BrandLogo({ className = "" }: { className?: string }) {
   return (
     <Image
-      src="/logo.svg"
+      src="/Inverbras-logo.jpg"
       alt="Inverbras Electricals Pvt Ltd"
-      width={280}
-      height={60}
+      width={300}
+      height={167}
       className={className}
       priority
     />
