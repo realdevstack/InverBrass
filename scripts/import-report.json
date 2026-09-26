@@ -1,0 +1,29 @@
+{
+  "mode": "commit",
+  "rowsRead": 6,
+  "imported": 0,
+  "skippedDuplicates": 3,
+  "rejected": 3,
+  "reconciliation": {
+    "balanced": true,
+    "difference": 0
+  },
+  "rejectedRows": [
+    {
+      "rowNumber": 4,
+      "reason": "Missing part number"
+    },
+    {
+      "rowNumber": 5,
+      "reason": "Quantity must be a positive number (got \"abc\")"
+    },
+    {
+      "rowNumber": 6,
+      "reason": "Result must be one of: draft, submitted, won, lost, cancelled (got \"maybe\")"
+    }
+  ],
+  "requirements": 2,
+  "oems": 3,
+  "lineItems": 2,
+  "quotations": 3
+}

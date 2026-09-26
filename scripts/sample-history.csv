@@ -1,0 +1,7 @@
+project_name,customer_agency,part_number,description,quantity,uom,oem_name,oem_category,quoted_price,final_price,result,loss_reason,l1_price,competitor,submission_date
+Radar Module,HAL,PN-RAD-01,Radar module,100,nos,Bharat Dynamics Ltd,Defence electronics,1000000,1150000,won,,,2025-11-02
+Radar Module,HAL,PN-RAD-01,Radar module,100,nos,L&T Defence,Naval and land systems,1050000,1050000,lost,price,980000,Alpha Systems,2025-11-02
+Comms Unit,DRDO,PN-COM-05,Comms unit,250,nos,Tata Advanced Systems,Aerospace structures,45000,52000,submitted,,,2026-01-15
+Bad Row,DRDO,,Widget,10,nos,Unknown OEM,General,1000,1200,lost,,,2026-02-01
+Sensor Array,IAF,PN-SEN-09,Sensor,abc,nos,Bharat Dynamics Ltd,Defence electronics,5000,6000,won,,,2026-03-01
+Old Bid,BSF,PN-OLD-1,Old item,5,nos,L&T Defence,Naval and land systems,100,120,maybe,,,2026-03-02
