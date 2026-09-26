@@ -1,4 +1,4 @@
-# Inverbrass Defence CRM — TECH-STACK.md (v2)
+# Inverbras Defence CRM — TECH-STACK.md (v2)
 
 > Intended destination: `D:\FWAI\projects\InverBase\TECH-STACK.md`. Saved here because plan mode
 > permits writes only inside the plan directory; an implementation-capable agent should copy this

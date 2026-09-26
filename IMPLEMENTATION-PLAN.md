@@ -1,10 +1,10 @@
-# Inverbrass Defence CRM — IMPLEMENTATION-PLAN.md
+# Inverbras Defence CRM — IMPLEMENTATION-PLAN.md
 
 > Intended destination: `D:\FWAI\projects\InverBase\IMPLEMENTATION-PLAN.md`. Saved here because plan
 > mode permits writes only inside the plan directory; an implementation-capable agent should copy this
 > file to the project root unchanged.
 
-Read `Inverbrass CRM — PRD v1.md` and `inverbrass-crm-tech-stack.md` first. Where they disagree, the
+Read `Inverbras CRM — PRD v1.md` and `Inverbras-crm-tech-stack.md` first. Where they disagree, the
 tech-stack document wins. Follow this order literally; do not reorder, merge, or skip steps.
 
 ## Sequencing risk, stated first
@@ -13,7 +13,7 @@ tech-stack document wins. Follow this order literally; do not reorder, merge, or
    (RFI → OEM → coverage → quotation, then PO → PDI → invoicing), you build the requirement spine before
    you know what the second half needs, and you rebuild it when PO, PDI, invoice and commission arrive.
    The data model is the expensive thing here, so lock it once, up front, then build vertical slices.
-2. **The PRD would have you put approval on a single boolean.** `inverbrass-crm-tech-stack.md` locks two
+2. **The PRD would have you put approval on a single boolean.** `Inverbras-crm-tech-stack.md` locks two
    levels (Group Head, then Management). Build two levels. A single `approved` flag is a defect, not a
    shortcut.
 3. **The obvious demo order is the wrong order.** The plain-language assistant is the only model-dependent
@@ -308,7 +308,7 @@ Lock it this way so the client's still-open capacity question does not force a r
 - Build strictly in the step order above; do not start a later step to make the demo look better.
 - No schema change outside a migration file; no ORM; no second data store; no public signup.
 - No model call on any save path or core query; Step 14 stays optional and last.
-- Treat every contradiction between `Inverbrass CRM — PRD v1.md` and `inverbrass-crm-tech-stack.md` as
+- Treat every contradiction between `Inverbras CRM — PRD v1.md` and `Inverbras-crm-tech-stack.md` as
   resolved in favour of the tech-stack document, and note the contradiction in `REPORT.md`.
 
 ## Recovered requirements — client workbook, 26 Sep 2026 (added by the member)
@@ -345,5 +345,5 @@ server-side `.xlsx` writer (CSV is used instead). Competitor master remains a fr
 client provides its columns.
 
 Naming note: the workbook names the company "Supreme Q" in the Input Sheet (commission/employee
-columns) while the PRD, TECH-STACK and this plan say "Inverbrass". The build keeps "Inverbrass" and the
+columns) while the PRD, TECH-STACK and this plan say "Inverbras". The build keeps "Inverbras" and the
 contradiction is recorded in `REPORT.md` for the member to confirm.

@@ -1,10 +1,10 @@
-# Inverbrass Defence CRM — Product Requirements Document (PRD v1)
+# Inverbras Defence CRM — Product Requirements Document (PRD v1)
 
 Sep 26, 2026 · Prepared by @Krishhna Saai Pawan
 
 ## 1. Executive Summary
 
-Ram Prasad runs Inverbrass, a defence contract consultancy. Government and defence agencies send him requirements (RFI/tender), and he fulfils them through a network of OEM suppliers, earning commission on the deals he closes.
+Ram Prasad runs Inverbras, a defence contract consultancy. Government and defence agencies send him requirements (RFI/tender), and he fulfils them through a network of OEM suppliers, earning commission on the deals he closes.
 
 **Today's volume:** roughly 25-30 enquiries/month, \~20 quotations, \~10 orders, 20-25 active orders at any time, handled by a 15-20 person team (Sales, Operations, Finance, under Group Head/Management).
 
@@ -20,7 +20,7 @@ Ram Prasad runs Inverbrass, a defence contract consultancy. Government and defen
 
 **Goal:** one requirement, one record, one timeline. Replace Excel/email with a system where every RFI, quotation, PO, PDI, delivery, payment and commission traces back to a single requirement, with quantity coverage, document expiry and delivery risk visible before anyone has to ask.
 
-This PRD is based on the client's own detailed workbook (Inverbrass\_Odoo\_Order\_Management\_sheet.xlsx), a requirements brief, and a pain-points note, and fills remaining gaps with explicit assumptions in Section 2.
+This PRD is based on the client's own detailed workbook (Inverbras\_Odoo\_Order\_Management\_sheet.xlsx), a requirements brief, and a pain-points note, and fills remaining gaps with explicit assumptions in Section 2.
 
 ## 2. Assumptions Made in This Version
 
@@ -82,7 +82,7 @@ The RFI is the central record. Everything else in the system hangs off it.
 
 **OEM master record:** OEM name, brand/product category, country of origin, contact persons (multiple), product portfolio, MOQ rules, lead time, pricing validity rules, freight terms, warranty terms, payment terms, commission percentage, NDA/agreement status, certification details with expiry dates, bank details.
 
-**Approval status:** an OEM is marked approved based on the **government agency's own vendor list**, not an internal Inverbrass decision. The system stores this status and its source, it does not decide it.
+**Approval status:** an OEM is marked approved based on the **government agency's own vendor list**, not an internal Inverbras decision. The system stores this status and its source, it does not decide it.
 
 **Sourcing flow:** from an RFI, shortlist OEMs who can supply the required part(s). Record each request sent and the response received. OEMs may reply by email, WhatsApp, or phone — all three need to be loggable against the sourcing request (as a note/attachment, not necessarily live integration for WhatsApp in MVP).
 
@@ -98,7 +98,7 @@ The RFI is the central record. Everything else in the system hangs off it.
 
 **Build a quote from the requirement:** OEM price, freight charges, taxes/GST, delivery terms, lead time, payment terms, target margin, recommended price. Margin is decided case by case, not a fixed percentage by category, so the system suggests but never auto-sets the final price.
 
-**Government format:** quotes must go out in the government/agency's own format, not a single fixed Inverbrass template. The system needs a flexible quote template per agency, or an export that can be reformatted, rather than one rigid layout.
+**Government format:** quotes must go out in the government/agency's own format, not a single fixed Inverbras template. The system needs a flexible quote template per agency, or an export that can be reformatted, rather than one rigid layout.
 
 **Price Negotiation Committee (PNC):** track PNC status as a distinct field on the quotation, since agencies may route quotes through a negotiation committee before acceptance.
 
@@ -150,7 +150,7 @@ The RFI is the central record. Everything else in the system hangs off it.
 
 **Dashboard (Management view):**
 
-- *Pending/at-risk:* Total RFIs, Active Quotations, Open POs, Pending Deliveries, Pending Payments (from client to Inverbrass), **Pending Invoices from OEM to client**, Overdue Payments, deliveries at risk vs committed deadline, documents expiring
+- *Pending/at-risk:* Total RFIs, Active Quotations, Open POs, Pending Deliveries, Pending Payments (from client to Inverbras), **Pending Invoices from OEM to client**, Overdue Payments, deliveries at risk vs committed deadline, documents expiring
 - *Performance/positive KPIs:* Won vs Lost Opportunities, Tender Conversion Ratio, Average Quotation Turnaround Time, Delivery Adherence, Payment Collection Cycle, Commission Recovery Time, Commission Receivable, OEM Performance, Client Repeat Business, Employee-wise Performance, Revenue by OEM, Revenue by Client, Monthly/Yearly Sales Trend
 - *Reports:* Client-wise, OEM-wise, product-wise sales; PO tracking; delivery status; PDI status; invoice aging; outstanding payments; margin report; GST and TDS summary; profitability report
 

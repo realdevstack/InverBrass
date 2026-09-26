@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { signOutAction } from "@/app/actions/auth";
+import { BrandMark } from "@/components/brand";
 import { NavLinks, type NavItem } from "@/components/nav-links";
 import { createClient } from "@/lib/supabase/server";
 import { canRead, type AppRole } from "@/lib/rules/access";
@@ -59,9 +60,9 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
     <div className="flex min-h-screen">
       <aside className="rail flex w-14 shrink-0 flex-col md:w-60">
         <div className="flex h-14 items-center gap-2 border-b border-hairline px-3">
-          <span className="brand-chip h-8 w-8 font-display text-sm font-bold">I</span>
+          <BrandMark className="h-8 w-8 shrink-0" />
           <span className="hidden font-display text-sm font-bold tracking-tight text-ink md:inline">
-            Inverbrass
+            Inverbras
           </span>
         </div>
         <NavLinks items={items} />

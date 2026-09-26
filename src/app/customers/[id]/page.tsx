@@ -38,7 +38,7 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
       <section className="panel mt-4 grid gap-3 p-4 text-sm sm:grid-cols-3">
         <div><p className="label">GST number</p><p className="mono">{customer.gst_number ?? "—"}</p></div>
         <div><p className="label">GeM registration</p><p>{customer.gem_registration ?? "—"}</p></div>
-        <div><p className="label">Vendor registration</p><p>{customer.inverbrass_vendor_registration ?? "—"}</p></div>
+        <div><p className="label">Vendor registration</p><p>{customer.Inverbras_vendor_registration ?? "—"}</p></div>
         <div><p className="label">Portal login mapping</p><p>{customer.portal_login_mapping ?? "—"}</p></div>
         <div><p className="label">Payment terms</p><p>{customer.payment_terms ?? "—"}</p></div>
         <div><p className="label">Approval requirements</p><p>{customer.approval_requirements ?? "—"}</p></div>

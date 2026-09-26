@@ -113,13 +113,13 @@ isOneToOne: false
                   ]
                 },"customers": {
                   Row: {
-                    "approval_requirements": string | null,"billing_address": string | null,"created_at": string,"created_by": string | null,"delivery_address": string | null,"division": string | null,"gem_registration": string | null,"gst_number": string | null,"id": string,"inverbrass_vendor_registration": string | null,"is_active": boolean,"name": string,"payment_terms": string | null,"portal_login_mapping": string | null,"sub_division": string | null,"updated_at": string
+                    "approval_requirements": string | null,"billing_address": string | null,"created_at": string,"created_by": string | null,"delivery_address": string | null,"division": string | null,"gem_registration": string | null,"gst_number": string | null,"id": string,"Inverbras_vendor_registration": string | null,"is_active": boolean,"name": string,"payment_terms": string | null,"portal_login_mapping": string | null,"sub_division": string | null,"updated_at": string
                   }
                   Insert: {
-                    "approval_requirements"?: string | null,"billing_address"?: string | null,"created_at"?: string,"created_by"?: string | null,"delivery_address"?: string | null,"division"?: string | null,"gem_registration"?: string | null,"gst_number"?: string | null,"id"?: string,"inverbrass_vendor_registration"?: string | null,"is_active"?: boolean,"name": string,"payment_terms"?: string | null,"portal_login_mapping"?: string | null,"sub_division"?: string | null,"updated_at"?: string
+                    "approval_requirements"?: string | null,"billing_address"?: string | null,"created_at"?: string,"created_by"?: string | null,"delivery_address"?: string | null,"division"?: string | null,"gem_registration"?: string | null,"gst_number"?: string | null,"id"?: string,"Inverbras_vendor_registration"?: string | null,"is_active"?: boolean,"name": string,"payment_terms"?: string | null,"portal_login_mapping"?: string | null,"sub_division"?: string | null,"updated_at"?: string
                   }
                   Update: {
-                    "approval_requirements"?: string | null,"billing_address"?: string | null,"created_at"?: string,"created_by"?: string | null,"delivery_address"?: string | null,"division"?: string | null,"gem_registration"?: string | null,"gst_number"?: string | null,"id"?: string,"inverbrass_vendor_registration"?: string | null,"is_active"?: boolean,"name"?: string,"payment_terms"?: string | null,"portal_login_mapping"?: string | null,"sub_division"?: string | null,"updated_at"?: string
+                    "approval_requirements"?: string | null,"billing_address"?: string | null,"created_at"?: string,"created_by"?: string | null,"delivery_address"?: string | null,"division"?: string | null,"gem_registration"?: string | null,"gst_number"?: string | null,"id"?: string,"Inverbras_vendor_registration"?: string | null,"is_active"?: boolean,"name"?: string,"payment_terms"?: string | null,"portal_login_mapping"?: string | null,"sub_division"?: string | null,"updated_at"?: string
                   }
                   Relationships: [
                     

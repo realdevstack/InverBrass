@@ -1,4 +1,4 @@
-# REPORT — Inverbrass Defence CRM
+# REPORT — Inverbras Defence CRM
 
 ## Status per part
 
@@ -57,7 +57,7 @@
 ## Running the demo
 
 - `npm run dev`, then open http://localhost:3000.
-- Sign in with `owner@inverbrass.demo` / `Inverbrass#2026` (also `grouphead@`, `management@`, `sales@`, `operations@`, `finance@` at the same domain/password).
+- Sign in with `owner@Inverbras.demo` / `Inverbras#2026` (also `grouphead@`, `management@`, `sales@`, `operations@`, `finance@` at the same domain/password).
 - `/requirements` lists the seeded "Airborne Radio Set" with coverage; open it for line items, coverage and documents.
 - Region: per the client, the Singapore project is accepted for the demo MVP. Recorded as a deviation from the Mumbai lock in `TECH-STACK.md`.
 
@@ -82,11 +82,16 @@ Master Data Inputs: Customer Master (14 fields + multiple contacts), OEM Master 
 ## Deployment
 
 ### GitHub — DONE
-- Pushed `main` to https://github.com/realdevstack/InverBrass.
-- evidence: `git push -u origin main` -> `* [new branch] main -> main`; `gh repo view realdevstack/InverBrass` -> `defaultBranchRef main`, `pushedAt 2026-09-26T18:49:08Z`; `git ls-remote --heads origin` -> `341d0d8… refs/heads/main`.
+- Pushed `main` to https://github.com/realdevstack/Inverbras.
+- evidence: `git push -u origin main` -> `* [new branch] main -> main`; `gh repo view realdevstack/Inverbras` -> `defaultBranchRef main`, `pushedAt 2026-09-26T18:49:08Z`; `git ls-remote --heads origin` -> `341d0d8… refs/heads/main`.
 - `.env.local` is not committed (gitignored); only `.env.example` is tracked. Verified with `git ls-files | grep .env`.
 
-### Vercel — BLOCKED from this machine (needs the member's login)
+### Vercel 500 on protected pages — ROOT CAUSE FOUND (env vars missing)
+Fetched the live deployment: `/` and `/requirements` returned **500**, while `/health` and `/login` returned 200. The live `/health` page names the cause:
+`Missing environment variables: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY` — both **no**; `SUPABASE_SERVICE_ROLE_KEY` **yes**.
+Fix: add those two variables to Vercel (Production + Preview) and **redeploy** (NEXT_PUBLIC values are baked at build time); `/health` should then show both as `yes`. A root `error.tsx` now turns this class of failure into a friendly message that links to `/health`.
+
+### Vercel — project deploy BLOCKED from this machine (needs the member's login)
 ```
 BLOCKED: create the Vercel project and deploy
   Tried:      npx --yes vercel@latest whoami
@@ -148,7 +153,7 @@ BLOCKED: supabase db diff (migration-drift check)
 - **Role count.** PRD §3 lists four rows; the superseded stack says four; TECH-STACK.md says five; the plan enumerates six. Building six (`owner`, `group_head`, `management`, `sales`, `operations`, `finance`) and recording the choice here.
 - **Design tokens.** IMPLEMENTATION-PLAN.md "Design tokens" fixes a Cream/Ink Blue/Deep Teal/Warm Sand palette and a light canvas. The member supplied a new design system on 26 Sep (Ink Navy rail, Signal Teal / Alert Amber / Clear Green / Risk Red, Space Grotesk + IBM Plex Sans + IBM Plex Mono, dark left rail). The member's design wins; `globals.css`, `layout.tsx` and `app-shell.tsx` implement it. It also supplies the Risk Red the plan asked for before Step 10.
 - **Fuller brief after the PRD.** The member supplied the client workbook on 26 Sep and said the PRD/design had missed requirements. The workbook's five tabs are now part of the brief and are recorded in IMPLEMENTATION-PLAN.md "Recovered requirements — client workbook, 26 Sep 2026". The documents, not the earlier chat, were updated in the same change.
-- **Company name in the workbook.** The Input Sheet names the company "Supreme Q" in the commission and employee columns, while the PRD, TECH-STACK and plan say "Inverbrass". The UI keeps "Inverbrass"; flagged for the member to confirm.
+- **Company name in the workbook.** The Input Sheet names the company "Supreme Q" in the commission and employee columns, while the PRD, TECH-STACK and plan say "Inverbras". The UI keeps "Inverbras"; flagged for the member to confirm.
 
 ## Claims ledger
 
@@ -177,7 +182,10 @@ BLOCKED: supabase db diff (migration-drift check)
 | GitHub push | `git push -u origin main` | `* [new branch] main -> main`; remote head `341d0d8` |
 | No secret committed | `git ls-files \| grep .env` | only `.env.example`; no `.env.local` |
 | Service key is server-only | grep `supabase/admin` | imported only by `admin/actions.ts` and `admin/users/page.tsx` (both server) |
-| Vercel deploy | `npx vercel whoami` | BLOCKED — interactive login; see Deployment |
+| Vercel deploy | `npx vercel whoami` | BLOCKED — interactive login; deploy done from the dashboard by the member |
+| Live 500 root cause | `curl https://inverbrass.vercel.app/health` | page reports `NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY` missing |
+| Brand rename | `Select-String src -Pattern Inverbrass` | 0 capital occurrences (only `@inverbrass.demo` demo logins kept) |
+| Logo assets served | `curl -o NUL -w %{http_code} /logo.svg` | `logo.svg=200`, `logo-mark.svg=200` |
 | Reports grouped Sales/Operational/Financial | `node scripts/verify-page.mjs` | `/reports` contains all three group headings |
 | Master data seeded and linked | `node scripts/verify-steps.mjs` | `customers 3, products 4, requirements_linked_customer 4, lines_linked_product 4, pos_linked_customer 1` |
 | Sheet1 stage flow page | `node scripts/verify-page.mjs` | `/process` → "Order management stages", live counts, gates |

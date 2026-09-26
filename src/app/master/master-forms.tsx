@@ -30,7 +30,7 @@ export function CustomerCreateForm() {
         <div><label className={label} htmlFor="sub_division">Sub-division</label><input id="sub_division" name="sub_division" className={field} /></div>
         <div><label className={label} htmlFor="gst_number">GST number</label><input id="gst_number" name="gst_number" className={field} /></div>
         <div><label className={label} htmlFor="gem_registration">GeM registration</label><input id="gem_registration" name="gem_registration" className={field} /></div>
-        <div><label className={label} htmlFor="inverbrass_vendor_registration">Vendor registration no.</label><input id="inverbrass_vendor_registration" name="inverbrass_vendor_registration" className={field} /></div>
+        <div><label className={label} htmlFor="Inverbras_vendor_registration">Vendor registration no.</label><input id="Inverbras_vendor_registration" name="Inverbras_vendor_registration" className={field} /></div>
         <div><label className={label} htmlFor="portal_login_mapping">Portal login mapping</label><input id="portal_login_mapping" name="portal_login_mapping" className={field} /></div>
         <div><label className={label} htmlFor="payment_terms">Payment terms</label><input id="payment_terms" name="payment_terms" className={field} /></div>
         <div><label className={label} htmlFor="approval_requirements">Approval requirements</label><input id="approval_requirements" name="approval_requirements" className={field} /></div>

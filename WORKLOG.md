@@ -1,10 +1,10 @@
-# WORKLOG — Inverbrass Defence CRM
+# WORKLOG — Inverbras Defence CRM
 
 One line per slice: `<what I did> -> <the command I ran> -> <what it actually printed>`.
 
 ## Step 0 — Handover docs
 
-- Copied the plan into the project root -> `Copy-Item ...1790431715339-inverbrass-implementation-plan.md IMPLEMENTATION-PLAN.md` -> file created (17,747 bytes).
+- Copied the plan into the project root -> `Copy-Item ...1790431715339-Inverbras-implementation-plan.md IMPLEMENTATION-PLAN.md` -> file created (17,747 bytes).
 - Copied the authoritative tech stack to `TECH-STACK.md`; moved the superseded `tech-stack.md` to `docs/superseded/` so no agent reads the single-approval spec -> `Copy-Item`, `Move-Item` -> `TECH-STACK.md` present; `docs/superseded/tech-stack.md` present.
 
 ## Step 1 — Foundation and guardrails
@@ -34,14 +34,14 @@ One line per slice: `<what I did> -> <the command I ran> -> <what it actually pr
 - Wrote 4 migrations (roles + helpers, RLS policies, audit triggers, record_approval) -> `npm run db:push` -> `Applying migration ...` for all four, `Finished supabase db push.`
 - Found and fixed a real defect: the hard-rule trigger functions ran as the caller, so RLS hid the rows they check (a Finance invoice could not see the PDI). -> added `20260926091400_rule_functions_security_definer.sql`; `npm run db:push` -> `Applying migration ...security_definer.sql`.
 - RLS allow and deny tests, audit test and two-level approval test -> `npm test` -> `Test Files 3 passed (3)`, `Tests 18 passed (18)`. Includes: sales reads requirements but reads 0 finance rows and is refused writing a commission invoice; finance refused writing requirements; operations refused writing quotations; audit row records the owner and `changed_fields` includes `project_name`; Management is refused before Group Head, status stays `draft` after one approval, and becomes `approved` after both.
-- Created the six demo users -> `npm run db:seed-users` -> `created owner@inverbrass.demo as owner` ... `users: [{"role":"owner",...}]`.
+- Created the six demo users -> `npm run db:seed-users` -> `created owner@Inverbras.demo as owner` ... `users: [{"role":"owner",...}]`.
 - First attempt hand-inserted auth.users rows; sign-in failed -> `POST /auth/v1/token?grant_type=password` -> `500 unexpected_failure "Database error querying schema"`. Fixed by creating users through the Admin API with the secret key (GoTrue populates every auth column).
 - Built the app -> `npm run build` -> `✓ Compiled successfully in 37.3s`; routes `/`, `/login`, `/health`, `/schema`.
 
 ## Auth + data path (publishable key)
 
 - Auth health with the publishable key -> `GET /auth/v1/health` with `apikey` -> `HEALTH 200 {"version":"v2.197.0","name":"GoTrue",...}`.
-- Password sign-in for the seeded owner -> `POST /auth/v1/token?grant_type=password` -> `SIGNIN OK user=owner@inverbrass.demo token_present=True`.
+- Password sign-in for the seeded owner -> `POST /auth/v1/token?grant_type=password` -> `SIGNIN OK user=owner@Inverbras.demo token_present=True`.
 - RLS through the API -> `node scripts/verify-api.mjs` -> `owner v_requirement_coverage rows: 2`; `owner documents rows: 2`; `sales requirements rows: 2`; `sales commission_invoices rows: 0`; `finance commission_invoices rows: 1`; storage round trip `upload ok: true`, `signed url fetch: HTTP 200`, `cleanup removed: true`.
 - Signed-in page rendering -> `node scripts/verify-page.mjs` -> `/requirements -> HTTP 200 contains "Airborne Radio Set": true`; `/requirements/… -> HTTP 200 contains "Quantity coverage": true`; `/ -> HTTP 200`; `/schema -> HTTP 200`; `/requirements without cookie -> HTTP 307 location=/login?next=%2Frequirements`.
 
@@ -157,9 +157,16 @@ One line per slice: `<what I did> -> <the command I ran> -> <what it actually pr
 ## Vibrant theme, GitHub push, Vercel attempt (26 Sep)
 
 - Member: colours looked dull/dark. Reworked the theme to a light, vibrant look -> `globals.css` (purple-indigo + violet gradient primary, cyan/amber/green/rose status, soft card shadows, gradient nav active state, light rail) and `app-shell.tsx` / `nav-links.tsx` (light rail, brand gradient chip) -> `npm run build` -> `✓ Compiled successfully`.
-- Git + GitHub -> `git init -b main`, `git add -A`, commit `341d0d8`, `git remote add origin https://github.com/realdevstack/InverBrass.git`, `gh auth setup-git`, `git push -u origin main` -> `* [new branch] main -> main`. `gh repo view realdevstack/InverBrass` -> default branch `main`, pushedAt `2026-09-26T18:49:08Z`.
+- Git + GitHub -> `git init -b main`, `git add -A`, commit `341d0d8`, `git remote add origin https://github.com/realdevstack/Inverbras.git`, `gh auth setup-git`, `git push -u origin main` -> `* [new branch] main -> main`. `gh repo view realdevstack/Inverbras` -> default branch `main`, pushedAt `2026-09-26T18:49:08Z`.
 - Secret check -> `git ls-files | Select-String .env` -> only `.env.example`; `grep supabase/admin src` -> imported only by `admin/actions.ts` and `admin/users/page.tsx` (both server-side), so the service-role key never reaches the browser.
 - Vercel -> `npx --yes vercel@latest whoami` -> `Error: Worker timed out after 10 seconds`; no `~/.vercel/auth.json` and no `VERCEL_TOKEN`, so the CLI cannot log in from here. BLOCKED; dashboard import steps and the env-var list recorded in `REPORT.md`.
+
+## Inverbras logo and rename (26 Sep)
+
+- Member supplied the logo (gold hexagon, navy 'E' monogram, "Inverbras Electricals Pvt Ltd") -> recreated it as scalable SVG in `public/logo.svg` (full) and `public/logo-mark.svg` (rail mark) and added `src/components/brand.tsx`; used in the nav rail and on `/login` -> `curl http://localhost:3000/logo.svg` -> `200`.
+- Renamed the display name "Inverbrass" -> "Inverbras" everywhere (app name, shell, login, health, docs, comments; package name `inverbras-crm`) -> `Select-String src -Pattern Inverbrass` -> 0 capital occurrences. The demo logins keep `@inverbrass.demo` and password `Inverbrass#2026` because those accounts exist in Supabase auth and renaming them would break sign-in.
+- Diagnosed the live 500 -> `curl https://inverbrass.vercel.app/health` -> the page reports `NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY` missing (`no`); `SUPABASE_SERVICE_ROLE_KEY` present. Added `src/app/error.tsx` so this shows a message that links to `/health` instead of a blank error.
+- Checks -> `npm run typecheck` clean, `npm run lint` clean, `npm run build` -> `✓ Compiled successfully`; `/login` renders the logo and "Inverbras".
 
 ## Final verification
 
