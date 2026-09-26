@@ -170,6 +170,11 @@ One line per slice: `<what I did> -> <the command I ran> -> <what it actually pr
 - Member said the drawn logo was wrong, then saved the real artwork as `public/Inverbras-logo.jpg` (1376x768). Wired the **real JPG** as the full logo and cropped the hexagon to `public/logo-mark.png` (413x503) with System.Drawing for the rail; deleted the drawn SVGs. No SVG conversion needed — a raster->SVG would only wrap the JPG (or need lossy tracing).
 - Evidence -> `/Inverbras-logo.jpg -> 200`, `/logo-mark.png -> 200`, and `/login` renders `/_next/image?url=%2FInverbras-logo.jpg`; `npm run typecheck` clean, `npm run lint` clean.
 
+## Palette matched to inverbras.in (26 Sep)
+
+- Member asked the app to match inverbras.in. Pulled the site palette -> `curl http://inverbras.in/css/style.css` -> dominant brand colours `#0b3d91` (deep blue), `#2d6cdf` (blue), `#ffcc00` (gold), `#5cb85c` (green), `#f0ad4e` (amber), `#d9534f` (red) — the same blue + gold as the logo.
+- Rethemed `globals.css` to those tokens (blue gradient primary, gold accent class, blue/gold background wash, plus `--color-progress` so `text-progress` actually resolves) -> `npm run build` -> `✓ Compiled successfully`; `node scripts/verify-page.mjs` -> `ALL PAGES OK`.
+
 ## Final verification
 
 - `npm run typecheck` -> no output (clean).
