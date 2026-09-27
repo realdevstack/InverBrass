@@ -233,3 +233,9 @@ One line per slice: `<what I did> -> <the command I ran> -> <what it actually pr
   3. `buildReachIndex()` scanned the full master tables on every request. -> it now takes a scope (`customerIds`, `customerNames`, `oemIds`) and reads only those rows, returning an empty index when nothing is requested; both pages pass the ids/names of the rows they actually render.
 - Tests -> `npm test` -> `Test Files 16 passed (16)`, `Tests 84 passed (84)` (new `sanitizeEmailAddress` cases).
 - Evidence -> `npm run typecheck` clean, `npm run lint` clean, `npm run build` -> `✓ Compiled successfully`; live fetch (prod server started on a spare port, then stopped) -> `/finance customer resolved by id (HAL contact): true` (`a.sharma@example.invalid` present, proving the id link works), `/ has no injected email: true`, mailto/wa.me/tel present on `/` and `/finance`; `node scripts/verify-page.mjs` -> `ALL PAGES OK`. Temp scripts removed after use.
+
+## Committed, pushed and deployed (27 Sep)
+
+- Staged and committed the communication-placeholder work -> `git add -- <11 files>`; `git commit -m "feat(comms): email/WhatsApp/call placeholders on dashboard and finance" ...` -> `[main 42f2465] ... 11 files changed, 585 insertions(+), 19 deletions(-)`.
+- Pushed -> `git push origin main` -> `081b555..42f2465  main -> main`; `git ls-remote --heads origin` -> `42f246556b888df68aab66f0d53ad3179abc6356 refs/heads/main`.
+- Vercel: the CLI cannot authenticate from this machine (no `~/.vercel/auth.json`, no `VERCEL_TOKEN`; `npx vercel whoami` hangs on interactive login, then the shell times out). The project is connected to the GitHub repo, so the push triggered a production deploy -> after ~2 minutes, live fetch (signed in) -> `https://inverbrass.vercel.app/` -> `wa.me:true mailto:true oemEmail:true`; `/finance` -> `wa.me:true customerEmail:true oemEmail:true`; `/notifications` -> `Template catalogue:true`.

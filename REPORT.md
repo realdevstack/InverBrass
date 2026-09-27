@@ -96,9 +96,14 @@ Master Data Inputs: Customer Master (14 fields + multiple contacts), OEM Master 
 ## Deployment
 
 ### GitHub — DONE
-- Pushed `main` to https://github.com/realdevstack/Inverbras.
-- evidence: `git push -u origin main` -> `* [new branch] main -> main`; `gh repo view realdevstack/Inverbras` -> `defaultBranchRef main`, `pushedAt 2026-09-26T18:49:08Z`; `git ls-remote --heads origin` -> `341d0d8… refs/heads/main`.
+- Pushed `main` to https://github.com/realdevstack/InverBrass.git.
+- evidence: `git push -u origin main` -> `* [new branch] main -> main`; later pushes `081b555..42f2465  main -> main`; `git ls-remote --heads origin` -> `42f246556b888df68aab66f0d53ad3179abc6356 refs/heads/main`.
 - `.env.local` is not committed (gitignored); only `.env.example` is tracked. Verified with `git ls-files | grep .env`.
+
+### Vercel — live via the GitHub integration (27 Sep)
+- The contact-placeholder commit `42f2465` was pushed to `main`, and the Vercel project is connected to the GitHub repo, so the push triggered a production deployment.
+- evidence (live fetch, signed in as the seeded owner): `https://inverbrass.vercel.app/` -> `wa.me:true mailto:true oemEmail:true`; `/finance` -> `wa.me:true customerEmail:true oemEmail:true`; `/notifications` -> `Template catalogue:true`.
+- The Vercel CLI cannot deploy from this machine (no `~/.vercel/auth.json`, no `VERCEL_TOKEN`; `npx vercel whoami` hangs on interactive login). Deployment therefore relies on the GitHub integration, which works.
 
 ### Vercel 500 on protected pages — ROOT CAUSE FOUND (env vars missing)
 Fetched the live deployment: `/` and `/requirements` returned **500**, while `/health` and `/login` returned 200. The live `/health` page names the cause:
