@@ -239,3 +239,9 @@ One line per slice: `<what I did> -> <the command I ran> -> <what it actually pr
 - Staged and committed the communication-placeholder work -> `git add -- <11 files>`; `git commit -m "feat(comms): email/WhatsApp/call placeholders on dashboard and finance" ...` -> `[main 42f2465] ... 11 files changed, 585 insertions(+), 19 deletions(-)`.
 - Pushed -> `git push origin main` -> `081b555..42f2465  main -> main`; `git ls-remote --heads origin` -> `42f246556b888df68aab66f0d53ad3179abc6356 refs/heads/main`.
 - Vercel: the CLI cannot authenticate from this machine (no `~/.vercel/auth.json`, no `VERCEL_TOKEN`; `npx vercel whoami` hangs on interactive login, then the shell times out). The project is connected to the GitHub repo, so the push triggered a production deploy -> after ~2 minutes, live fetch (signed in) -> `https://inverbrass.vercel.app/` -> `wa.me:true mailto:true oemEmail:true`; `/finance` -> `wa.me:true customerEmail:true oemEmail:true`; `/notifications` -> `Template catalogue:true`.
+
+## Pictorial process flow (27 Sep)
+
+- Rebuilt `src/app/process/page.tsx` into a visual flow, no diagram library: a horizontal chain of the nine stages with arrows and live counts plus a legend, and the stage detail drawn as a vertical timeline (numbered nodes + connector line), keeping the master-data and business-rule panels. Added `await check("/process", "Process flow at a glance")` to `scripts/verify-page.mjs`.
+- Checks -> `npm run typecheck` clean; `npm run lint` clean; `npm run build` -> `✓ Compiled successfully`; signed-in fetch -> `http://localhost:3000/process -> HTTP 200`, contains "Process flow at a glance": true, "Step 9": true, "Commission invoice": true, "Order management stages": true, 18 arrow glyphs.
+- Committed and pushed; the GitHub-connected Vercel project redeployed -> live fetch -> `https://inverbrass.vercel.app/process` contains "Process flow at a glance": true.

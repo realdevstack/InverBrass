@@ -95,6 +95,7 @@ await check("/reports", "Sales Reports");
 await check("/reports", "Operational Reports");
 await check("/reports", "Financial Reports");
 await check("/process", "Order management stages");
+await check("/process", "Process flow at a glance");
 
 // Communication placeholders (email / WhatsApp / phone links)
 await check("/", "wa.me");

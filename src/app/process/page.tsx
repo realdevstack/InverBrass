@@ -6,6 +6,8 @@ import { createClient } from "@/lib/supabase/server";
 export const dynamic = "force-dynamic";
 
 type Stage = {
+  step: number;
+  short: string;
   name: string;
   href: string;
   count: number;
@@ -39,15 +41,15 @@ export default async function ProcessPage() {
     ]);
 
   const stages: Stage[] = [
-    { name: "1. RFI / Tender enquiry", href: "/requirements", count: rfis, key: "requirements", from: "Customer Master (customer_id)", gate: "Entry point. One record per enquiry, with up to 500 line items." },
-    { name: "2. Quotation", href: "/quotations", count: quotations, key: "quotations.requirement_id", from: "RFI", gate: "Every quotation must originate from an RFI. Two-level approval before submission." },
-    { name: "3. Purchase Order", href: "/orders", count: pos, key: "purchase_orders.quotation_id / requirement_id", from: "Quotation", gate: "A PO can only be created from an approved quotation. One quotation can yield one PO." },
-    { name: "4. Material readiness", href: "/delivery", count: readiness, key: "material_readiness.purchase_order_id", from: "PO", gate: "OEM confirms batch/serial, quantity ready and expected completion (feeds LD risk)." },
-    { name: "5. PDI / Inspection", href: "/delivery", count: pdis, key: "pdis.purchase_order_id", from: "Material readiness + PO line", gate: "Failed PDI blocks dispatch and locks invoicing until cleared." },
-    { name: "6. OEM invoice", href: "/finance", count: invoices, key: "oem_invoices.purchase_order_id / pdi_id", from: "PO + cleared PDI", gate: "Invoicing is refused until a PDI for the same PO is cleared. Multiple invoices per PO allowed." },
-    { name: "7. Delivery", href: "/finance", count: deliveries, key: "deliveries.oem_invoice_id", from: "OEM invoice", gate: "Multiple deliveries per invoice; pending balance tracked; closure on full delivery." },
-    { name: "8. Payment", href: "/finance", count: payments, key: "payments.oem_invoice_id", from: "OEM invoice", gate: "Partial payments allowed; balance and overdue days computed; follow-up status." },
-    { name: "9. Commission invoice", href: "/finance", count: commission, key: "commission_invoices.oem_invoice_id", from: "OEM invoice", gate: "Commission can only be raised after the OEM invoice is paid. Auto-calculated from the OEM-wise percentage." },
+    { step: 1, short: "RFI", name: "RFI / Tender enquiry", href: "/requirements", count: rfis, key: "requirements", from: "Customer Master (customer_id)", gate: "Entry point. One record per enquiry, with up to 500 line items." },
+    { step: 2, short: "Quotation", name: "Quotation", href: "/quotations", count: quotations, key: "quotations.requirement_id", from: "RFI", gate: "Every quotation must originate from an RFI. Two-level approval before submission." },
+    { step: 3, short: "Purchase Order", name: "Purchase Order", href: "/orders", count: pos, key: "purchase_orders.quotation_id / requirement_id", from: "Quotation", gate: "A PO can only be created from an approved quotation. One quotation can yield one PO." },
+    { step: 4, short: "Material readiness", name: "Material readiness", href: "/delivery", count: readiness, key: "material_readiness.purchase_order_id", from: "PO", gate: "OEM confirms batch/serial, quantity ready and expected completion (feeds LD risk)." },
+    { step: 5, short: "PDI / Inspection", name: "PDI / Inspection", href: "/delivery", count: pdis, key: "pdis.purchase_order_id", from: "Material readiness + PO line", gate: "Failed PDI blocks dispatch and locks invoicing until cleared." },
+    { step: 6, short: "OEM invoice", name: "OEM invoice", href: "/finance", count: invoices, key: "oem_invoices.purchase_order_id / pdi_id", from: "PO + cleared PDI", gate: "Invoicing is refused until a PDI for the same PO is cleared. Multiple invoices per PO allowed." },
+    { step: 7, short: "Delivery", name: "Delivery", href: "/finance", count: deliveries, key: "deliveries.oem_invoice_id", from: "OEM invoice", gate: "Multiple deliveries per invoice; pending balance tracked; closure on full delivery." },
+    { step: 8, short: "Payment", name: "Payment", href: "/finance", count: payments, key: "payments.oem_invoice_id", from: "OEM invoice", gate: "Partial payments allowed; balance and overdue days computed; follow-up status." },
+    { step: 9, short: "Commission invoice", name: "Commission invoice", href: "/finance", count: commission, key: "commission_invoices.oem_invoice_id", from: "OEM invoice", gate: "Commission can only be raised after the OEM invoice is paid. Auto-calculated from the OEM-wise percentage." },
   ];
 
   const businessRules = [
@@ -96,6 +98,51 @@ export default async function ProcessPage() {
       </p>
 
       <section className="panel mt-4 p-4">
+        <h2 className="font-medium">Process flow at a glance</h2>
+        <p className="mt-1 text-sm text-muted-ink">
+          Each box is a stage, the arrow is the hard gate to the next one, and the badge is the live record count.
+        </p>
+
+        <div className="mt-3 overflow-x-auto pb-1">
+          <ol className="flex min-w-max items-center gap-1">
+            {stages.map((stage, index) => (
+              <li key={stage.name} className="flex items-center gap-1">
+                <Link
+                  href={stage.href}
+                  className="panel status-row block w-36 p-2 transition hover:border-primary"
+                  data-status="progress"
+                  aria-label={`Step ${stage.step}: ${stage.name}, ${stage.count} record(s)`}
+                >
+                  <span className="label">Step {stage.step}</span>
+                  <span className="mt-0.5 block text-sm font-medium leading-tight">{stage.short}</span>
+                  <span className="mono mt-1 inline-block rounded bg-content px-1.5 py-0.5 text-xs">
+                    {stage.count} record(s)
+                  </span>
+                </Link>
+                {index < stages.length - 1 && (
+                  <span className="px-0.5 text-lg text-muted-ink" aria-hidden="true">
+                    &rarr;
+                  </span>
+                )}
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-ink">
+          <span className="inline-flex items-center gap-1">
+            <span className="dot dot-progress" aria-hidden="true" /> Stage in the chain
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <span aria-hidden="true">&rarr;</span> Gate enforced in the database
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <span className="mono rounded bg-content px-1.5 py-0.5">n</span> Live record count
+          </span>
+        </div>
+      </section>
+
+      <section className="panel mt-6 p-4">
         <h2 className="font-medium">Master data feeds the stages</h2>
         <div className="mt-2 grid gap-3 text-sm sm:grid-cols-3">
           <div className="status-row pl-2" data-status="progress">
@@ -121,34 +168,45 @@ export default async function ProcessPage() {
             <Link href="/products" className="text-sm hover:underline">Open parts</Link>
           </div>
         </div>
+        <p className="mt-2 text-xs text-muted-ink">
+          <span aria-hidden="true">&darr;</span> These masters feed every stage below, so a value is captured once and reused.
+        </p>
       </section>
 
       <section className="mt-6">
         <h2 className="text-lg font-bold">Order management stages</h2>
-        <ul className="mt-3 space-y-3">
-          {stages.map((stage) => (
-            <li key={stage.name} className="panel p-4">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <h3 className="font-medium">
-                  <Link href={stage.href} className="hover:underline">{stage.name}</Link>
-                </h3>
-                <span className="mono rounded bg-content px-2 py-0.5 text-xs">{stage.count} record(s)</span>
+        <ol className="mt-3">
+          {stages.map((stage, index) => (
+            <li key={stage.name} className="relative flex gap-3 pb-3 last:pb-0">
+              {index < stages.length - 1 && (
+                <span className="absolute left-[13px] top-8 bottom-0 w-px bg-hairline" aria-hidden="true" />
+              )}
+              <span className="mono z-10 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-progress/10 text-xs font-semibold text-progress">
+                {stage.step}
+              </span>
+              <div className="panel status-row flex-1 p-3" data-status="progress">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h3 className="font-medium">
+                    <Link href={stage.href} className="hover:underline">{stage.name}</Link>
+                  </h3>
+                  <span className="mono rounded bg-content px-2 py-0.5 text-xs">{stage.count} record(s)</span>
+                </div>
+                <dl className="mt-2 grid gap-2 text-sm sm:grid-cols-2">
+                  <div>
+                    <dt className="label">Links from</dt>
+                    <dd>{stage.from}</dd>
+                    <dt className="label mt-1">Key</dt>
+                    <dd className="mono text-xs">{stage.key}</dd>
+                  </div>
+                  <div>
+                    <dt className="label">Gate / rule</dt>
+                    <dd>{stage.gate}</dd>
+                  </div>
+                </dl>
               </div>
-              <dl className="mt-2 grid gap-2 text-sm sm:grid-cols-2">
-                <div>
-                  <dt className="label">Links from</dt>
-                  <dd>{stage.from}</dd>
-                  <dt className="label mt-1">Key</dt>
-                  <dd className="mono text-xs">{stage.key}</dd>
-                </div>
-                <div>
-                  <dt className="label">Gate / rule</dt>
-                  <dd>{stage.gate}</dd>
-                </div>
-              </dl>
             </li>
           ))}
-        </ul>
+        </ol>
         <p className="mt-3 text-sm text-muted-ink">
           The chain is enforced in the database, not just the UI: the gates above are triggers, so a PO without an approved
           quotation, an invoice without a cleared PDI, or a commission before payment all fail even if called directly.
