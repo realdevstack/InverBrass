@@ -1,7 +1,9 @@
 import Link from "next/link";
 
 import { AppShell } from "@/components/app-shell";
+import { ContactActions } from "@/components/contact-actions";
 import { buildManagementData, formatDays, formatPercent } from "@/lib/data/management";
+import { buildReachIndex } from "@/lib/data/reach";
 import { assessLdRisk } from "@/lib/rules/ld-risk";
 import { formatInr, istDateString } from "@/lib/rules/dates";
 import { canRead, type AppRole } from "@/lib/rules/access";
@@ -30,7 +32,7 @@ function KpiLine({ label, value }: { label: string; value: string }) {
 
 export default async function DashboardPage() {
   const supabase = await createClient();
-  const [management, riskRows, expiring, recent, followups, dueRfis] = await Promise.all([
+  const [management, riskRows, expiring, recent, followups, dueRfis, pendingInvoices] = await Promise.all([
     buildManagementData(),
     supabase.from("v_order_risk").select("*"),
     supabase.from("v_document_register").select("*").not("days_to_expiry", "is", null).lte("days_to_expiry", 90).order("days_to_expiry").limit(6),
@@ -43,7 +45,26 @@ export default async function DashboardPage() {
       .not("submission_deadline", "is", null)
       .order("submission_deadline", { ascending: true })
       .limit(5),
+    supabase
+      .from("v_invoice_balances")
+      .select("*")
+      .gt("balance_outstanding", 0)
+      .order("due_in_days", { ascending: true, nullsFirst: false })
+      .limit(8),
   ]);
+
+  // Who to contact for a follow-up: the party's primary contact, looked up from
+  // the master records, bounded to the rows actually shown. Placeholder only —
+  // the links open the user's own client.
+  const reach = await buildReachIndex({
+    customerIds: [...(followups.data ?? []).map((f) => f.customer_id), ...(pendingInvoices.data ?? []).map((i) => i.customer_id)],
+    customerNames: [...(followups.data ?? []).map((f) => f.customer), ...(pendingInvoices.data ?? []).map((i) => i.customer)],
+    oemIds: [...(pendingInvoices.data ?? []).map((i) => i.oem_id), ...(expiring.data ?? []).map((d) => d.oem_id)],
+  });
+
+  const reachForCustomerRow = (customerId: string | null, name: string | null) =>
+    reach.forCustomerId(customerId) ?? reach.forCustomer(name);
+  const reachForOem = (oemId: string | null | undefined) => reach.forOem(oemId);
 
   const atRisk = (riskRows.data ?? []).filter(
     (row) =>
@@ -119,26 +140,92 @@ export default async function DashboardPage() {
           </ul>
           <h3 className="mt-3 text-xs font-semibold uppercase text-muted-ink">Overdue payments</h3>
           <ul className="text-sm">
-            {followups.data?.map((f) => (
-              <li key={f.oem_invoice_id} className="flex items-center justify-between border-b border-hairline py-1">
-                <Link href={`/finance/${f.oem_invoice_id}`} className="mono hover:underline">{f.invoice_number}</Link>
-                <span className="text-risk">{f.overdue_days}d · {f.followup_status}</span>
-              </li>
-            ))}
+            {followups.data?.map((f) => {
+              const contact = reachForCustomerRow(f.customer_id, f.customer);
+              return (
+                <li key={f.oem_invoice_id} className="flex items-center justify-between gap-2 border-b border-hairline py-1">
+                  <Link href={`/finance/${f.oem_invoice_id}`} className="mono hover:underline">{f.invoice_number}</Link>
+                  <span className="flex items-center gap-2">
+                    <ContactActions
+                      label="Customer"
+                      email={contact?.email ?? null}
+                      phone={contact?.phone ?? null}
+                      subject={`Payment reminder: invoice ${f.invoice_number}`}
+                      message={`Following up on the outstanding balance on invoice ${f.invoice_number} (${f.overdue_days} days overdue).`}
+                    />
+                    <span className="text-risk">{f.overdue_days}d · {f.followup_status}</span>
+                  </span>
+                </li>
+              );
+            })}
             {followups.data?.length === 0 && <li className="py-1 text-muted-ink">Nothing overdue.</li>}
+          </ul>
+          <h3 className="mt-3 text-xs font-semibold uppercase text-muted-ink">Pending OEM invoices</h3>
+          <ul className="text-sm">
+            {pendingInvoices.data?.map((inv) => {
+              const customer = reachForCustomerRow(inv.customer_id, inv.customer);
+              const oem = reachForOem(inv.oem_id);
+              const overdue = inv.due_in_days !== null && inv.due_in_days < 0;
+              return (
+                <li key={inv.oem_invoice_id} className="border-b border-hairline py-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <Link href={`/finance/${inv.oem_invoice_id}`} className="mono hover:underline">{inv.invoice_number}</Link>
+                    <span className="mono">{formatInr(Number(inv.balance_outstanding))}</span>
+                  </div>
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className={`text-xs ${overdue ? "text-risk" : "text-muted-ink"}`}>
+                      {inv.due_in_days === null ? "no due date" : overdue ? `${Math.abs(inv.due_in_days)}d overdue` : `due in ${inv.due_in_days}d`}
+                    </span>
+                    <span className="flex flex-wrap items-center gap-2">
+                      <ContactActions
+                        label="Customer"
+                        email={customer?.email ?? null}
+                        phone={customer?.phone ?? null}
+                        subject={`Payment follow-up: invoice ${inv.invoice_number}`}
+                        message={`Following up on invoice ${inv.invoice_number} for ${formatInr(Number(inv.balance_outstanding))}.`}
+                      />
+                      <ContactActions
+                        label="OEM"
+                        email={oem?.email ?? null}
+                        phone={oem?.phone ?? null}
+                        subject={`Invoice ${inv.invoice_number} status`}
+                        message={`Checking the status of invoice ${inv.invoice_number}.`}
+                      />
+                    </span>
+                  </div>
+                </li>
+              );
+            })}
+            {pendingInvoices.data?.length === 0 && <li className="py-1 text-muted-ink">No invoice awaiting payment.</li>}
           </ul>
           <h3 className="mt-3 text-xs font-semibold uppercase text-muted-ink">Documents expiring</h3>
           <ul className="text-sm">
-            {expiring.data?.slice(0, 4).map((doc) => (
-              <li key={doc.document_id} className="flex items-center justify-between border-b border-hairline py-1">
-                <span>{doc.title ?? doc.file_name}</span>
-                <span className={Number(doc.days_to_expiry) < 0 ? "text-risk" : "text-alert"}>
-                  {doc.expiry_date ? istDateString(doc.expiry_date) : ""}
-                </span>
-              </li>
-            ))}
+            {expiring.data?.slice(0, 4).map((doc) => {
+              const oemContact = reachForOem(doc.oem_id);
+              return (
+                <li key={doc.document_id} className="flex items-center justify-between gap-2 border-b border-hairline py-1">
+                  <span className="min-w-0 truncate">{doc.title ?? doc.file_name}</span>
+                  <span className="flex items-center gap-2">
+                    <ContactActions
+                      label="OEM"
+                      email={oemContact?.email ?? null}
+                      phone={oemContact?.phone ?? null}
+                      subject={`Renewal reminder: ${doc.title ?? doc.file_name ?? "document"}`}
+                      message={`Please share the renewed ${doc.title ?? "document"} before it expires.`}
+                    />
+                    <span className={Number(doc.days_to_expiry) < 0 ? "text-risk" : "text-alert"}>
+                      {doc.expiry_date ? istDateString(doc.expiry_date) : ""}
+                    </span>
+                  </span>
+                </li>
+              );
+            })}
             {expiring.data?.length === 0 && <li className="py-1 text-muted-ink">Nothing expiring.</li>}
           </ul>
+          <p className="mt-3 text-xs text-muted-ink">
+            Email / WhatsApp / Call icons are placeholders — they open your own mail, WhatsApp or phone app with the
+            message prefilled. A greyed icon means the party has no contact on file. Nothing is sent automatically.
+          </p>
         </section>
 
         <section className="panel p-4">

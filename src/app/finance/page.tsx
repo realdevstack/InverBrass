@@ -1,6 +1,8 @@
 import Link from "next/link";
 
 import { AppShell } from "@/components/app-shell";
+import { ContactActions } from "@/components/contact-actions";
+import { buildReachIndex } from "@/lib/data/reach";
 import { formatInr, istDateString } from "@/lib/rules/dates";
 import { createClient } from "@/lib/supabase/server";
 
@@ -17,6 +19,13 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
     invoiceQuery,
     supabase.from("commission_invoices").select("*").order("created_at", { ascending: false }),
   ]);
+
+  // Contact lookup bounded to the invoices on screen.
+  const reach = await buildReachIndex({
+    customerIds: (invoices.data ?? []).map((i) => i.customer_id),
+    customerNames: (invoices.data ?? []).map((i) => i.customer),
+    oemIds: (invoices.data ?? []).map((i) => i.oem_id),
+  });
 
   const outstanding = (invoices.data ?? []).reduce((sum, row) => sum + Number(row.balance_outstanding), 0);
   const overdue = (invoices.data ?? []).filter((row) => row.due_in_days !== null && row.due_in_days < 0 && Number(row.balance_outstanding) > 0);
@@ -58,11 +67,14 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
               <th className="px-3 py-2 text-right">Paid</th>
               <th className="px-3 py-2 text-right">Balance</th>
               <th className="px-3 py-2">Commission</th>
+              <th className="px-3 py-2">Contact</th>
             </tr>
           </thead>
           <tbody>
             {invoices.data?.map((inv) => {
               const isOverdue = inv.due_in_days !== null && inv.due_in_days < 0 && Number(inv.balance_outstanding) > 0;
+              const customer = reach.forCustomerId(inv.customer_id) ?? reach.forCustomer(inv.customer);
+              const oem = reach.forOem(inv.oem_id);
               return (
                 <tr key={inv.oem_invoice_id} className="status-row border-b border-hairline" data-status={isOverdue ? "risk" : Number(inv.balance_outstanding) === 0 ? "clear" : "pending"}>
                   <td className="mono px-3 py-2">
@@ -76,11 +88,29 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
                   <td className="mono px-3 py-2 text-right">{formatInr(Number(inv.paid_amount))}</td>
                   <td className={`mono px-3 py-2 text-right ${isOverdue ? "text-risk" : ""}`}>{formatInr(Number(inv.balance_outstanding))}</td>
                   <td className="px-3 py-2 text-xs">{inv.commission_invoice_number ?? "—"}</td>
+                  <td className="px-3 py-2">
+                    <span className="flex flex-wrap items-center gap-2">
+                      <ContactActions
+                        label="Customer"
+                        email={customer?.email ?? null}
+                        phone={customer?.phone ?? null}
+                        subject={`Payment follow-up: invoice ${inv.invoice_number}`}
+                        message={`Following up on invoice ${inv.invoice_number} for ${formatInr(Number(inv.balance_outstanding))}.`}
+                      />
+                      <ContactActions
+                        label="OEM"
+                        email={oem?.email ?? null}
+                        phone={oem?.phone ?? null}
+                        subject={`Invoice ${inv.invoice_number} status`}
+                        message={`Checking the status of invoice ${inv.invoice_number}.`}
+                      />
+                    </span>
+                  </td>
                 </tr>
               );
             })}
             {invoices.data?.length === 0 && (
-              <tr><td colSpan={9} className="px-3 py-6 text-center text-muted-ink">No OEM invoices yet.</td></tr>
+              <tr><td colSpan={10} className="px-3 py-6 text-center text-muted-ink">No OEM invoices yet.</td></tr>
             )}
           </tbody>
         </table>

@@ -96,6 +96,10 @@ await check("/reports", "Operational Reports");
 await check("/reports", "Financial Reports");
 await check("/process", "Order management stages");
 
+// Communication placeholders (email / WhatsApp / phone links)
+await check("/", "wa.me");
+await check("/finance", "wa.me");
+
 // Recovered requirements — master data, audit, numbering, print, export
 await check("/customers", "Customer master");
 await check("/products", "Parts master");

@@ -205,3 +205,31 @@ One line per slice: `<what I did> -> <the command I ran> -> <what it actually pr
 
 - Validated the ten automation requirements against the live schema and code (read-only) -> temp query of `pg_trigger`/`pg_proc` -> `TABLES WITHOUT AN AUDIT TRIGGER: ["audit_log","quotation_versions"]` (every business table is audited; the two excluded are the log itself and a derived snapshot of `quotations`); `AUTO-NUMBER TRIGGERS:` `requirements→set_rfi_number`, `quotations→set_quotation_number`, `material_readiness→set_readiness_number`, `pdis→set_pdi_number`, `deliveries→set_delivery_number`; `DASHBOARD METRICS:` `{"total_rfis":"4","open_pos":"1","overdue_invoices":"0","documents_expiring":"1","commission_receivable":"796500.00"}`.
 - Result: DONE — RFI numbering, quotation numbering, approval workflow (quotation + order), auto commission, auto dashboard, audit logs. PARTIAL (in-app only, no outbound) — payment-due visibility, document-expiry reminders. MISSING — email reminders, escalation workflow for overdue payments (no mail provider and no cron/scheduler exist in the repo; TECH-STACK defers outbound messaging to Phase 2). Recorded in `REPORT.md`.
+
+## Reminder email placeholders (27 Sep)
+
+- Wrote the email templates as pure, tested modules (no provider, no sending) -> `src/lib/rules/email-templates.ts` -> five templates: RFI deadline reminder, payment due reminder, overdue payment escalation, document expiry reminder, OEM certification expiry reminder; each returns `{ to, subject, body }` and the catalogue lists its merge fields.
+- Added the `/notifications` page: the template catalogue with merge fields and a labelled sample, plus drafts filled from live records (overdue payments, documents expiring ≤90 days, OEM certifications expired/due-soon, RFIs inside their reminder window) and an "Open in mail client" `mailto:` link. Nothing is sent; the page says so.
+- Nav item "Reminders & emails" (area `requirements`, so every role sees it) + a mail icon -> `src/components/app-shell.tsx`, `src/components/nav-links.tsx`; added to `scripts/verify-page.mjs` and `scripts/verify-roles.mjs`.
+- Tests -> `npm test` -> `Test Files 15 passed (15)`, `Tests 78 passed (78)` (6 new email-template tests: subject/body content, INR formatting, escalation wording, expiry state wording, catalogue coverage).
+- Build + live evidence (production server started on a spare port by a temporary script, then stopped) -> `npm run build` -> `✓ Compiled successfully` incl. `ƒ /notifications`; live fetch -> `/notifications -> HTTP 200 contains "Reminder emails": true`, `contains "Template catalogue": true`, `contains "Open in mail client": true`; `grouphead / management / sales / operations / finance: menu has Reminders=true, /notifications HTTP 200`. Temp script removed after use.
+
+## Communicate icons on the dashboard and finance (27 Sep)
+
+- Built the placeholder channel links -> `src/components/contact-actions.tsx` (email `mailto:`, WhatsApp `https://wa.me/…`, phone `tel:`; a channel with nothing on file renders greyed-out and disabled), plus `src/lib/rules/contacts.ts` (`pickPrimaryContact`, `toWhatsAppNumber` with the 91 default) and `src/lib/data/reach.ts` (one read of the customer/OEM master contacts, helpers per row).
+- Wired them where a follow-up happens:
+  - Dashboard "Overdue payments" rows: Customer icons; new "Pending OEM invoices" subsection (invoice, balance, due/overdue) with Customer + OEM icons.
+  - Dashboard "Documents expiring" rows: OEM icons to chase the renewal.
+  - Finance invoice table: a Contact column with Customer + OEM icons per invoice.
+  - A legend explains they are placeholders and that a greyed icon means no contact on file; nothing is sent automatically.
+- Tests -> `npm test` -> `Test Files 16 passed (16)`, `Tests 83 passed (83)` (4 new contact-helper tests; one caught a real ordering bug in `pickPrimaryContact` — it returned a non-primary when the primary had no channel — fixed).
+- Evidence -> `npm run typecheck` clean, `npm run lint` clean, `npm run build` -> `✓ Compiled successfully`; live fetch (prod server started on a spare port, then stopped) -> `/ has mailto: true, wa.me: true, tel: true, legend: true`; `/finance has mailto: true, wa.me: true, tel: true`; dashboard sample `wa.me/919000000001` (Bharat Dynamics contact on the expiring DGQA certificate); `node scripts/verify-page.mjs` -> `ALL PAGES OK` incl. the new `/ has wa.me` and `/finance has wa.me` checks. Temp scripts removed after use.
+
+## Review fixes on the communication placeholders (27 Sep)
+
+- Ran `/review uncommitted` -> 3 findings (1 warning, 2 suggestions); fixed all three:
+  1. Customer contact was matched by free-text name, so it silently disappeared when the master was renamed. -> migration `20260926093400_invoice_views_customer_id.sql` appends `po.customer_id` to `v_invoice_balances` and `v_followup_tracker` (appended, not reordered, so `create or replace view` keeps columns/grants); `npm run db:push` -> `Applying migration 20260926093400_invoice_views_customer_id.sql...`, `Finished supabase db push.`; `reach.ts` now keys customers by id with the name path as fallback; dashboard and finance call `forCustomerId(...) ?? forCustomer(...)`.
+  2. Raw email in `mailto:` could inject recipients/body. -> `sanitizeEmailAddress()` strips CR/LF and `? # &`; `ContactActions` uses the sanitized address and derives the enabled/title state from it.
+  3. `buildReachIndex()` scanned the full master tables on every request. -> it now takes a scope (`customerIds`, `customerNames`, `oemIds`) and reads only those rows, returning an empty index when nothing is requested; both pages pass the ids/names of the rows they actually render.
+- Tests -> `npm test` -> `Test Files 16 passed (16)`, `Tests 84 passed (84)` (new `sanitizeEmailAddress` cases).
+- Evidence -> `npm run typecheck` clean, `npm run lint` clean, `npm run build` -> `✓ Compiled successfully`; live fetch (prod server started on a spare port, then stopped) -> `/finance customer resolved by id (HAL contact): true` (`a.sharma@example.invalid` present, proving the id link works), `/ has no injected email: true`, mailto/wa.me/tel present on `/` and `/finance`; `node scripts/verify-page.mjs` -> `ALL PAGES OK`. Temp scripts removed after use.

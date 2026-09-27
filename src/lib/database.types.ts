@@ -1393,14 +1393,20 @@ isOneToOne: false
                   ]
                 },"v_followup_tracker": {
                   Row: {
-                    "balance_outstanding": number | null,"customer": string | null,"followup_status": string | null,"invoice_number": string | null,"oem_invoice_id": string | null,"overdue_days": number | null,"paid_amount": number | null,"payment_due_date": string | null,"status": Database["public"]['Enums']["invoice_status"] | null
+                    "balance_outstanding": number | null,"customer": string | null,"customer_id": string | null,"followup_status": string | null,"invoice_number": string | null,"oem_invoice_id": string | null,"overdue_days": number | null,"paid_amount": number | null,"payment_due_date": string | null,"status": Database["public"]['Enums']["invoice_status"] | null
                   }
                   Relationships: [
-                    
+                    {
+      foreignKeyName: "purchase_orders_customer_id_fkey"
+      columns: ["customer_id"]
+isOneToOne: false
+      referencedRelation: "customers"
+      referencedColumns: ["id"]
+    }
                   ]
                 },"v_invoice_balances": {
                   Row: {
-                    "balance_outstanding": number | null,"commission_amount": number | null,"commission_invoice_id": string | null,"commission_invoice_number": string | null,"customer": string | null,"due_in_days": number | null,"gross_amount": number | null,"gst_amount": number | null,"invoice_date": string | null,"invoice_number": string | null,"is_full_invoice": boolean | null,"last_payment_date": string | null,"net_amount": number | null,"oem_id": string | null,"oem_invoice_id": string | null,"oem_name": string | null,"paid_amount": number | null,"payment_due_date": string | null,"po_number": string | null,"purchase_order_id": string | null,"quantity_invoiced": number | null,"status": Database["public"]['Enums']["invoice_status"] | null
+                    "balance_outstanding": number | null,"commission_amount": number | null,"commission_invoice_id": string | null,"commission_invoice_number": string | null,"customer": string | null,"customer_id": string | null,"due_in_days": number | null,"gross_amount": number | null,"gst_amount": number | null,"invoice_date": string | null,"invoice_number": string | null,"is_full_invoice": boolean | null,"last_payment_date": string | null,"net_amount": number | null,"oem_id": string | null,"oem_invoice_id": string | null,"oem_name": string | null,"paid_amount": number | null,"payment_due_date": string | null,"po_number": string | null,"purchase_order_id": string | null,"quantity_invoiced": number | null,"status": Database["public"]['Enums']["invoice_status"] | null
                   }
                   Relationships: [
                     {
@@ -1421,6 +1427,12 @@ isOneToOne: false
 isOneToOne: false
       referencedRelation: "v_po_tracking"
       referencedColumns: ["purchase_order_id"]
+    },{
+      foreignKeyName: "purchase_orders_customer_id_fkey"
+      columns: ["customer_id"]
+isOneToOne: false
+      referencedRelation: "customers"
+      referencedColumns: ["id"]
     },{
       foreignKeyName: "purchase_orders_oem_id_fkey"
       columns: ["oem_id"]
