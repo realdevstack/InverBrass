@@ -29,6 +29,7 @@ const NAV: NavDef[] = [
   { href: "/reports", label: "Reports", icon: "reports", area: "finance" },
   { href: "/process", label: "Process flow", icon: "network", area: "requirements" },
   { href: "/assistant", label: "Assistant", icon: "assistant", area: "requirements" },
+  { href: "/notifications", label: "Reminders & emails", icon: "email", area: "requirements" },
   { href: "/admin/audit", label: "Audit log", icon: "documents", area: "admin" },
   { href: "/schema", label: "Schema", icon: "schema", area: "admin" },
   { href: "/admin/users", label: "Users & roles", icon: "users", area: "admin", ownerOnly: true },

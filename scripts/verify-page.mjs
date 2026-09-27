@@ -113,6 +113,9 @@ console.log(`/api/export?report=revenue-by-client -> HTTP ${exportRes.status} cs
 
 // Step 14 — assistant
 await check("/assistant", "off by default");
+
+// Reminder email placeholders (no sending)
+await check("/notifications", "Reminder emails");
 const assistant = await fetch("http://localhost:3000/api/assistant", {
   method: "POST",
   headers: { cookie, "content-type": "application/json" },

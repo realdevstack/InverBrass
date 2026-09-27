@@ -53,6 +53,17 @@
   - evidence: migrations `20260926092500`-`20260926092900` applied; auto numbering -> `node scripts/verify-steps.mjs` -> `RFI/2026/0001…0004`, `QTN/2026/0001…0004`; dashboard tiles + 8 Critical KPIs -> same script -> `commission_receivable 796500.00`, KPI views populated; `npm test` -> `recovered-requirements` and `critical KPIs` suites pass.
   - evidence: `node scripts/verify-page.mjs` -> `ALL PAGES OK` incl. `/customers`, `/products`, `/admin/audit`, `/quotations/…/print`, and `/api/export` returning `text/csv` (header `client,po_count,total_value`).
   - DEFERRED (recorded, not dropped): outbound email / payment-due / escalation email (TECH-STACK defers all outbound messaging to Phase 2), GeM portal integration (no portal API; CSV import is the path), WhatsApp (optional), server-side `.xlsx` writer (CSV is Excel-compatible). Competitor master stays free text until its columns are provided.
+- Business flow logic (27 Sep): DONE
+  - evidence: migration `20260926093200_business_flow_rules.sql` applied (`Applying migration 20260926093200_business_flow_rules.sql...`, `Finished supabase db push.`); `npx vitest run tests/sql/business-flow.test.ts` -> `Test Files 1 passed (1)`, `Tests 10 passed (10)`; `npm test` -> `Test Files 14 passed (14)`, `Tests 72 passed (72)`; `npm run build` -> `✓ Compiled successfully`; `node scripts/verify-page.mjs` -> `ALL PAGES OK`.
+  - Two real gaps closed: (1) the PO gate accepted `submitted` / `awaiting_approval` — it now requires both approval levels on record (`has_two_level_approval`), so a PO can only come from a genuinely approved quotation, whatever stage the status has since moved to; (2) a delivery or payment could exceed the invoiced quantity / gross amount — cumulative caps now refuse an over-run. Both are DB triggers, so no UI or direct call can bypass them.
+  - App-side guards added in `finance/actions.ts` (`recordPaymentAction`, `recordDeliveryAction`) so the over-run is rejected with a clear reason before the insert, matching the database.
+  - Rule visibility: `/process` now lists each of the seven rules and how it is enforced.
+  - Latent defect found and fixed while regenerating types: the live column was `inverbrass_vendor_registration` but the app used `Inverbras_vendor_registration` (wrong case and spelling), so the customer create/detail path could never read or write that field. Migration `20260926093300_customer_vendor_registration_column.sql` renames it to `inverbras_vendor_registration`; app, validation, form and seed updated; `npm run db:seed` -> `Seed applied. oems now: 3`; signed-in `/customers/33333333-…331` shows `IB-VEND-0007`.
+- Automation requirements validation (27 Sep): DONE for 6 of 10, PARTIAL for 2, MISSING for 2 (the PRD/tech-stack deferred outbound messaging to Phase 2)
+  - evidence: live `pg_trigger`/`pg_proc` query -> `TABLES WITHOUT AN AUDIT TRIGGER: ["audit_log","quotation_versions"]`; auto-number triggers on `requirements`, `quotations`, `material_readiness`, `pdis`, `deliveries`; `v_dashboard_metrics` returns live numbers `total_rfis 4, open_pos 1, overdue_invoices 0, documents_expiring 1, commission_receivable 796500.00`.
+  - DONE: automatic RFI numbering (`RFI/YYYY/NNNN`), automatic quotation numbering (`QTN/YYYY/NNNN`), approval workflow for quotations and orders (two-level, DB-enforced), auto commission calculation, auto dashboard updates (live views on every request), audit logs for every business table.
+  - PARTIAL (in-app only, no message is sent): payment-due visibility (`v_followup_tracker.overdue_days`), document/certification expiry reminders (`/documents?expiring=1`, `/oems/expiring`, dashboard tile).
+  - MISSING: email reminders; escalation workflow for overdue payments (the `followup_status` field is a manual dropdown; there is no scheduler, queue or mail provider in the repo).
 
 ## Running the demo
 
@@ -199,3 +210,14 @@ BLOCKED: supabase db diff (migration-drift check)
 | Admin page is owner-only | `node scripts/verify-roles.mjs` | owner: full access; all other roles: owner-only message |
 | App/DB permission parity | `npm test` | `role/area parity between the app and the database` passes |
 | Owner-only user administration | `npm test` | `user administration (owner only)` passes |
+| Business flow migration applied | `npm run db:push` | `Applying migration 20260926093200…`, `Finished supabase db push.` |
+| Quotation-from-RFI and PO-from-approved gates | `npx vitest run tests/sql/business-flow.test.ts` | 10 tests pass |
+| Multiple invoices per PO / deliveries per invoice | `npx vitest run tests/sql/business-flow.test.ts` | two invoices persist; two partial deliveries persist and a third is refused |
+| Commission after OEM payment milestone | `npx vitest run tests/sql/business-flow.test.ts` | refused on a part payment, allowed once paid |
+| Partial payments and over-payment guard | `npx vitest run tests/sql/business-flow.test.ts` | paid 400+600 -> balance 0; a further payment refused |
+| Audit trail on the whole chain | `npx vitest run tests/sql/business-flow.test.ts` | an insert audit row per stage; update row names `status` |
+| Full suite after the change | `npm test` | `Test Files 14 passed (14)`, `Tests 72 passed (72)` |
+| Build after the change | `npm run build` | `✓ Compiled successfully` (40 routes) |
+| Pages after the change | `node scripts/verify-page.mjs` | `ALL PAGES OK` |
+| Business flow rules visible | signed-in fetch of `/process` | HTTP 200 contains "Business flow rules" |
+| Vendor-registration column aligned to the app | `npm run db:push` + `npm run db:seed` | rename applied; `Seed applied. oems now: 3`; `/customers/33333333-…331` shows `IB-VEND-0007` |

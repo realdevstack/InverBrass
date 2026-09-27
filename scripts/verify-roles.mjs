@@ -36,6 +36,7 @@ const NAV = [
   ["/reports", "Reports"],
   ["/process", "Process flow"],
   ["/assistant", "Assistant"],
+  ["/notifications", "Reminders & emails"],
   ["/admin/audit", "Audit log"],
   ["/schema", "Schema"],
   ["/admin/users", "Users & roles"],

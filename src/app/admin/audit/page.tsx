@@ -34,7 +34,7 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
   let query = supabase
     .from("audit_log")
     .select("*")
-    .order("created_at", { ascending: false })
+    .order("at", { ascending: false })
     .limit(200);
   if (table) query = query.eq("table_name", table);
   const { data, error } = await query;

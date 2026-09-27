@@ -114,6 +114,20 @@ describe("auto-generated stage references (Input Sheet IDs)", () => {
   });
 });
 
+describe("audit log columns (admin audit page)", () => {
+  it("has `at` and not `created_at`", async () => {
+    await inRollback(async (db) => {
+      const cols = await db<{ column_name: string }[]>`
+        select column_name from information_schema.columns
+        where table_schema = 'public' and table_name = 'audit_log'
+      `;
+      const names = cols.map((c) => c.column_name);
+      expect(names).toContain("at");
+      expect(names).not.toContain("created_at");
+    });
+  });
+});
+
 describe("dashboard KPI and report views (Dashboard requirements tab)", () => {
   it("all resolve without error", async () => {
     await inRollback(async (db) => {
