@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { daysUntilDeadline, formatInr, istDateString } from "@/lib/rules/dates";
+import { daysUntilDeadline, formatInr, formatInrCompact, istDateString } from "@/lib/rules/dates";
 
 describe("IST day maths", () => {
   it("rolls the IST calendar day at 18:30 UTC, not midnight UTC", () => {
@@ -19,5 +19,12 @@ describe("IST day maths", () => {
 
   it("formats INR", () => {
     expect(formatInr(12500000)).toContain("1,25,00,000");
+  });
+
+  it("formats short Indian money", () => {
+    expect(formatInrCompact(12500000)).toBe("₹1.25 Cr");
+    expect(formatInrCompact(4077000)).toBe("₹40.77 L");
+    expect(formatInrCompact(9300)).toBe("₹9.3K");
+    expect(formatInrCompact(950)).toBe("₹950");
   });
 });

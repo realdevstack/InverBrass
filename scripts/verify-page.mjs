@@ -57,7 +57,7 @@ const SEEDED = {
 // Steps 1-4
 await check("/requirements", "Airborne Radio Set");
 await check(`/requirements/${SEEDED.requirement}`, "Quantity coverage");
-await check("/", "Dashboard");
+await check("/dashboard", "Management Dashboard");
 await check("/schema", "requirements");
 
 // Step 5 — OEM master

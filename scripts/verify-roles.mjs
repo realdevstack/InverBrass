@@ -22,7 +22,7 @@ const ref = new URL(url).hostname.split(".")[0];
 const BASE = "http://localhost:3000";
 
 const NAV = [
-  ["/", "Dashboard"],
+  ["/dashboard", "Dashboard"],
   ["/requirements", "RFIs"],
   ["/oems", "OEMs"],
   ["/customers", "Customers"],

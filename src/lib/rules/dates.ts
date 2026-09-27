@@ -42,3 +42,12 @@ export function formatInr(amount: number): string {
     maximumFractionDigits: 2,
   }).format(amount);
 }
+
+/** Short Indian money form: ₹1.25 Cr, ₹40.77 L, ₹9.3K. */
+export function formatInrCompact(amount: number): string {
+  const abs = Math.abs(amount);
+  if (abs >= 1_00_00_000) return `₹${(amount / 1_00_00_000).toFixed(2)} Cr`;
+  if (abs >= 1_00_000) return `₹${(amount / 1_00_000).toFixed(2)} L`;
+  if (abs >= 1_000) return `₹${(amount / 1_000).toFixed(1)}K`;
+  return `₹${amount.toFixed(0)}`;
+}

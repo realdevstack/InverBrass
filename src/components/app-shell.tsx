@@ -2,9 +2,11 @@ import Link from "next/link";
 
 import { signOutAction } from "@/app/actions/auth";
 import { BrandMark } from "@/components/brand";
-import { NavLinks, type NavItem } from "@/components/nav-links";
+import { NavLinks, type NavSection } from "@/components/nav-links";
 import { createClient } from "@/lib/supabase/server";
 import { canRead, type AppRole } from "@/lib/rules/access";
+
+type BadgeKey = "openOrders" | "overdueInvoices" | "documentsExpiring";
 
 type NavDef = {
   href: string;
@@ -12,27 +14,52 @@ type NavDef = {
   icon: string;
   area: Parameters<typeof canRead>[1];
   ownerOnly?: boolean;
+  badgeKey?: BadgeKey;
 };
 
-const NAV: NavDef[] = [
-  { href: "/", label: "Dashboard", icon: "dashboard", area: "requirements" },
-  { href: "/requirements", label: "RFIs", icon: "file", area: "requirements" },
-  { href: "/oems", label: "OEMs", icon: "factory", area: "oem" },
-  { href: "/customers", label: "Customers", icon: "customers", area: "master" },
-  { href: "/products", label: "Parts", icon: "products", area: "master" },
-  { href: "/sourcing", label: "Sourcing & coverage", icon: "network", area: "sourcing" },
-  { href: "/quotations", label: "Quotations", icon: "quote", area: "quotation" },
-  { href: "/orders", label: "Orders", icon: "order", area: "order" },
-  { href: "/delivery", label: "PDI & risk", icon: "pdi", area: "fulfilment" },
-  { href: "/finance", label: "Finance", icon: "finance", area: "finance" },
-  { href: "/documents", label: "Documents", icon: "documents", area: "documents" },
-  { href: "/reports", label: "Reports", icon: "reports", area: "finance" },
-  { href: "/process", label: "Process flow", icon: "network", area: "requirements" },
-  { href: "/assistant", label: "Assistant", icon: "assistant", area: "requirements" },
-  { href: "/notifications", label: "Reminders & emails", icon: "email", area: "requirements" },
-  { href: "/admin/audit", label: "Audit log", icon: "documents", area: "admin" },
-  { href: "/schema", label: "Schema", icon: "schema", area: "admin" },
-  { href: "/admin/users", label: "Users & roles", icon: "users", area: "admin", ownerOnly: true },
+const NAV_SECTIONS: Array<{ title?: string; items: NavDef[] }> = [
+  {
+    items: [
+      { href: "/dashboard", label: "Dashboard", icon: "dashboard", area: "requirements" },
+      { href: "/process", label: "Process flow", icon: "network", area: "requirements" },
+    ],
+  },
+  {
+    title: "Work",
+    items: [
+      { href: "/requirements", label: "RFIs & tenders", icon: "file", area: "requirements" },
+      { href: "/sourcing", label: "Sourcing", icon: "network", area: "sourcing" },
+      { href: "/quotations", label: "Quotations", icon: "quote", area: "quotation" },
+      { href: "/orders", label: "Orders", icon: "order", area: "order", badgeKey: "openOrders" },
+      { href: "/delivery", label: "PDI & risk", icon: "pdi", area: "fulfilment" },
+      { href: "/finance", label: "Money", icon: "finance", area: "finance", badgeKey: "overdueInvoices" },
+    ],
+  },
+  {
+    title: "Masters",
+    items: [
+      { href: "/oems", label: "OEMs", icon: "factory", area: "oem" },
+      { href: "/customers", label: "Customers", icon: "customers", area: "master" },
+      { href: "/products", label: "Parts", icon: "products", area: "master" },
+      { href: "/documents", label: "Documents", icon: "documents", area: "documents", badgeKey: "documentsExpiring" },
+    ],
+  },
+  {
+    title: "Insight",
+    items: [
+      { href: "/assistant", label: "Ask", icon: "assistant", area: "requirements" },
+      { href: "/reports", label: "Reports", icon: "reports", area: "finance" },
+      { href: "/notifications", label: "Reminders & emails", icon: "email", area: "requirements" },
+    ],
+  },
+  {
+    title: "Admin",
+    items: [
+      { href: "/admin/audit", label: "Audit log", icon: "documents", area: "admin" },
+      { href: "/schema", label: "Data health", icon: "schema", area: "admin" },
+      { href: "/admin/users", label: "Users & roles", icon: "users", area: "admin", ownerOnly: true },
+    ],
+  },
 ];
 
 export async function AppShell({ children }: { children: React.ReactNode }) {
@@ -43,30 +70,45 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
 
   let role: AppRole | null = null;
   let fullName: string | null = null;
+  const counts: Record<BadgeKey, number> = { openOrders: 0, overdueInvoices: 0, documentsExpiring: 0 };
   if (user) {
-    const { data } = await supabase
-      .from("user_roles")
-      .select("role, full_name")
-      .eq("user_id", user.id)
-      .maybeSingle();
-    role = (data?.role as AppRole | undefined) ?? null;
-    fullName = data?.full_name ?? null;
+    const [roleRow, metrics] = await Promise.all([
+      supabase.from("user_roles").select("role, full_name").eq("user_id", user.id).maybeSingle(),
+      supabase.from("v_dashboard_metrics").select("open_pos, overdue_invoices, documents_expiring").maybeSingle(),
+    ]);
+    role = (roleRow.data?.role as AppRole | undefined) ?? null;
+    fullName = roleRow.data?.full_name ?? null;
+    counts.openOrders = Number(metrics.data?.open_pos ?? 0);
+    counts.overdueInvoices = Number(metrics.data?.overdue_invoices ?? 0);
+    counts.documentsExpiring = Number(metrics.data?.documents_expiring ?? 0);
   }
 
-  const items: NavItem[] = NAV.filter(
-    (item) => canRead(role, item.area) && (!item.ownerOnly || role === "owner"),
-  ).map(({ href, label, icon }) => ({ href, label, icon }));
+  const sections: NavSection[] = NAV_SECTIONS.map((section) => ({
+    title: section.title,
+    items: section.items
+      .filter((item) => canRead(role, item.area) && (!item.ownerOnly || role === "owner"))
+      .map(({ href, label, icon, badgeKey }) => ({
+        href,
+        label,
+        icon,
+        badge: badgeKey ? counts[badgeKey] : undefined,
+      })),
+  }));
 
   return (
     <div className="flex min-h-screen">
       <aside className="rail flex w-14 shrink-0 flex-col md:w-52">
-        <div className="flex h-12 items-center gap-2 border-b border-hairline px-3">
+        <Link
+          href="/dashboard"
+          className="flex h-12 items-center gap-2 border-b border-hairline px-3"
+          aria-label="Inverbras — Dashboard"
+        >
           <BrandMark className="h-8 w-8 shrink-0" />
           <span className="hidden font-display text-sm font-bold tracking-tight text-ink md:inline">
             Inverbras
           </span>
-        </div>
-        <NavLinks items={items} />
+        </Link>
+        <NavLinks sections={sections} />
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">

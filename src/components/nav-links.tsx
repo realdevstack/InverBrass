@@ -3,31 +3,50 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-export type NavItem = { href: string; label: string; icon: string };
+export type NavItem = { href: string; label: string; icon: string; badge?: number };
+export type NavSection = { title?: string; items: NavItem[] };
 
 function isActive(pathname: string, href: string): boolean {
   if (href === "/") return pathname === "/";
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function NavLinks({ items }: { items: NavItem[] }) {
+export function NavLinks({ sections }: { sections: NavSection[] }) {
   const pathname = usePathname();
   return (
-    <nav className="flex flex-1 flex-col gap-0.5 px-2 py-3">
-      {items.map((item) => {
-        const active = isActive(pathname, item.href);
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            aria-current={active ? "page" : undefined}
-            className={`nav-item ${active ? "nav-item-active" : ""}`}
-          >
-            <NavIcon name={item.icon} />
-            <span className="hidden md:inline">{item.label}</span>
-          </Link>
-        );
-      })}
+    <nav className="flex flex-1 flex-col gap-3 overflow-y-auto px-2 py-3">
+      {sections.map((section, index) => (
+        <div key={section.title ?? `section-${index}`} className="flex flex-col gap-0.5">
+          {section.title && (
+            <p className="hidden px-2 pb-1 pt-1 text-[0.68rem] font-semibold uppercase tracking-wider text-muted-ink md:block">
+              {section.title}
+            </p>
+          )}
+          {section.items.map((item) => {
+            const active = isActive(pathname, item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={active ? "page" : undefined}
+                className={`nav-item ${active ? "nav-item-active" : ""}`}
+              >
+                <NavIcon name={item.icon} />
+                <span className="hidden md:inline">{item.label}</span>
+                {item.badge ? (
+                  <span
+                    className={`ml-auto hidden rounded-full px-1.5 text-xs md:inline ${
+                      active ? "bg-white/25 text-white" : "bg-content text-muted-ink"
+                    }`}
+                  >
+                    {item.badge}
+                  </span>
+                ) : null}
+              </Link>
+            );
+          })}
+        </div>
+      ))}
     </nav>
   );
 }
