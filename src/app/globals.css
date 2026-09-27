@@ -34,6 +34,11 @@
 }
 
 @layer base {
+  html {
+    /* Compact scale: rem-based spacing and type shrink together. */
+    font-size: 15px;
+  }
+
   body {
     background:
       radial-gradient(1100px 520px at 100% -10%, rgba(11, 61, 145, 0.1), transparent 60%),
@@ -70,8 +75,8 @@
   .panel {
     background: #ffffff;
     border: 1px solid #e2e8f2;
-    border-radius: 0.9rem;
-    box-shadow: 0 1px 2px rgba(15, 37, 71, 0.04), 0 10px 30px -18px rgba(15, 37, 71, 0.18);
+    border-radius: 0.65rem;
+    box-shadow: 0 1px 2px rgba(15, 37, 71, 0.03), 0 6px 18px -14px rgba(15, 37, 71, 0.16);
   }
 
   .btn-primary {
@@ -81,7 +86,7 @@
     border-radius: 0.6rem;
     background: linear-gradient(135deg, #0b3d91 0%, #2d6cdf 100%);
     color: #ffffff;
-    padding: 0.45rem 0.85rem;
+    padding: 0.35rem 0.7rem;
     font-size: 0.875rem;
     font-weight: 600;
     border: 1px solid transparent;
@@ -116,7 +121,7 @@
     border: 1px solid #e2e8f2;
     background: #ffffff;
     color: #0f2547;
-    padding: 0.45rem 0.85rem;
+    padding: 0.35rem 0.7rem;
     font-size: 0.875rem;
     font-weight: 500;
     transition: border-color 0.12s ease, color 0.12s ease, box-shadow 0.12s ease;
@@ -133,7 +138,7 @@
     border-radius: 0.55rem;
     border: 1px solid #e2e8f2;
     background: #ffffff;
-    padding: 0.5rem 0.7rem;
+    padding: 0.4rem 0.6rem;
     color: #0f2547;
     transition: border-color 0.12s ease, box-shadow 0.12s ease;
   }
@@ -175,8 +180,8 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    border-radius: 0.6rem;
-    padding: 0.5rem 0.7rem;
+    border-radius: 0.5rem;
+    padding: 0.4rem 0.6rem;
     font-size: 0.875rem;
     font-weight: 500;
     color: #5c6b85;
@@ -232,4 +237,12 @@
   .dot-risk {
     background: #d9534f;
   }
+}
+
+/* Compact pass: unlayered so these win over the utility padding on table cells
+   (unlayered CSS takes precedence over Tailwind's cascade layers). */
+table th,
+table td {
+  padding-top: 0.4rem;
+  padding-bottom: 0.4rem;
 }

@@ -114,7 +114,7 @@ on conflict (id) do nothing;
 -- Master data: Customer Master and Product / Part Master (workbook tabs).
 -- These are the "who" and the "what" that every stage record links back to.
 -- ---------------------------------------------------------------------------
-insert into public.customers (id, name, division, sub_division, gst_number, gem_registration, inverbrass_vendor_registration, portal_login_mapping, payment_terms, approval_requirements, billing_address, delivery_address)
+insert into public.customers (id, name, division, sub_division, gst_number, gem_registration, inverbras_vendor_registration, portal_login_mapping, payment_terms, approval_requirements, billing_address, delivery_address)
 values
   ('33333333-3333-3333-3333-333333333331', 'HAL', 'Avionics', 'Radio Unit', '29AAACH1234C1Z5', 'GEM/HAL/AVI/2026', 'IB-VEND-0007', 'hal-portal/inverbrass', '30% advance, 70% on delivery', 'RCMA', 'HAL Avionics, Bengaluru 560017', 'HAL Avionics stores, Bengaluru 560017'),
   ('33333333-3333-3333-3333-333333333332', 'DRDO', 'Optronics', 'NVG Division', '07AAAGD5678L1Z2', 'GEM/DRDO/OPT/2026', 'IB-VEND-0011', 'drdo-portal/inverbrass', 'Net 45', 'MIL', 'DRDO Optronics, Dehradun 248001', 'DRDO Optronics stores, Dehradun 248001'),

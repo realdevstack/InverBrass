@@ -10,7 +10,7 @@ export const customerSchema = z.object({
   delivery_address: optionalText(500),
   gst_number: optionalText(60),
   gem_registration: optionalText(200),
-  Inverbras_vendor_registration: optionalText(200),
+  inverbras_vendor_registration: optionalText(200),
   portal_login_mapping: optionalText(200),
   payment_terms: optionalText(300),
   approval_requirements: optionalText(300),

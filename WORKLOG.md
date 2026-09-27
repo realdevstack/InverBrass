@@ -175,6 +175,12 @@ One line per slice: `<what I did> -> <the command I ran> -> <what it actually pr
 - Member asked the app to match inverbras.in. Pulled the site palette -> `curl http://inverbras.in/css/style.css` -> dominant brand colours `#0b3d91` (deep blue), `#2d6cdf` (blue), `#ffcc00` (gold), `#5cb85c` (green), `#f0ad4e` (amber), `#d9534f` (red) — the same blue + gold as the logo.
 - Rethemed `globals.css` to those tokens (blue gradient primary, gold accent class, blue/gold background wash, plus `--color-progress` so `text-progress` actually resolves) -> `npm run build` -> `✓ Compiled successfully`; `node scripts/verify-page.mjs` -> `ALL PAGES OK`.
 
+## Compact layout + login check (27 Sep)
+
+- Member: "compact". Ran a density pass -> base type 15px, panel radius/shadow reduced, button/input/nav padding trimmed, header 48px, rail 208px, main padding `py-4`, and an unlayered `table th/td { padding-block: .4rem }` rule so table rows compress over the utility padding -> `npm run build` -> `✓ Compiled successfully`.
+- Member: operations@ and finance@ logins "not working". Reproduced -> `node scripts/_logins.mjs` -> all six accounts sign in against Supabase (`ok`), roles active, confirmed, not banned. End-to-end -> `node scripts/verify-roles.mjs` -> `operations pages: 10/10 OK`, `finance pages: 11/11 OK`, `ALL ROLE MENUS AND PAGES OK`. So the credentials and the app are fine locally; the live site fails for every user until the two `NEXT_PUBLIC_` variables are set on Vercel (see Deployment).
+- Note: background dev servers started here are reaped between turns; start `npm run dev` in a terminal to test.
+
 ## Final verification
 
 - `npm run typecheck` -> no output (clean).

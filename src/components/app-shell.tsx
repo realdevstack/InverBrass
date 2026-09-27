@@ -58,8 +58,8 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen">
-      <aside className="rail flex w-14 shrink-0 flex-col md:w-60">
-        <div className="flex h-14 items-center gap-2 border-b border-hairline px-3">
+      <aside className="rail flex w-14 shrink-0 flex-col md:w-52">
+        <div className="flex h-12 items-center gap-2 border-b border-hairline px-3">
           <BrandMark className="h-8 w-8 shrink-0" />
           <span className="hidden font-display text-sm font-bold tracking-tight text-ink md:inline">
             Inverbras
@@ -69,7 +69,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-14 items-center gap-3 border-b border-hairline bg-panel px-4">
+        <header className="flex h-12 items-center gap-3 border-b border-hairline bg-panel px-4">
           <form action="/requirements" className="hidden min-w-0 flex-1 sm:block">
             <input
               type="search"
@@ -100,7 +100,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
             </details>
           </div>
         </header>
-        <main className="min-w-0 flex-1 bg-content px-4 py-6">{children}</main>
+        <main className="min-w-0 flex-1 bg-content px-4 py-4">{children}</main>
       </div>
     </div>
   );

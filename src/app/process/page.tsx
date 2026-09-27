@@ -50,6 +50,44 @@ export default async function ProcessPage() {
     { name: "9. Commission invoice", href: "/finance", count: commission, key: "commission_invoices.oem_invoice_id", from: "OEM invoice", gate: "Commission can only be raised after the OEM invoice is paid. Auto-calculated from the OEM-wise percentage." },
   ];
 
+  const businessRules = [
+    {
+      rule: "Every quotation must originate from an RFI",
+      enforced: "quotations.requirement_id NOT NULL + FK",
+      detail: "A quotation cannot exist without its requirement record; the line item is tied to the same RFI.",
+    },
+    {
+      rule: "Every PO must map to an approved quotation",
+      enforced: "purchase_orders_require_approved_quotation",
+      detail: "The PO gate requires both approval levels on record; a draft, a one-level approval, or an unknown quotation is refused.",
+    },
+    {
+      rule: "Multiple invoices can exist against one PO",
+      enforced: "no unique on oem_invoices.purchase_order_id",
+      detail: "A PO can be invoiced in full or in several invoices; the invoice list shows every one against the PO.",
+    },
+    {
+      rule: "Multiple deliveries can exist against one invoice",
+      enforced: "no unique on deliveries.oem_invoice_id",
+      detail: "Each delivery is a separate row; the pending balance is tracked against the invoiced quantity.",
+    },
+    {
+      rule: "Commission invoice only after the OEM payment milestone",
+      enforced: "commission_invoices_require_payment",
+      detail: "Commission is refused until the OEM invoice is marked paid or its payments cover the gross amount.",
+    },
+    {
+      rule: "Partial deliveries and partial payments are supported",
+      enforced: "deliveries_within_invoice_quantity / payments_within_invoice_amount",
+      detail: "Part quantities and part amounts are allowed and accumulate; an over-delivery or over-payment beyond the invoice balance is refused.",
+    },
+    {
+      rule: "Complete audit trail maintained",
+      enforced: "per-table audit triggers",
+      detail: "Every insert, update and delete on the chain tables writes what changed, who changed it and when.",
+    },
+  ];
+
   return (
     <AppShell>
       <h1 className="text-2xl font-semibold">Process flow</h1>
@@ -115,6 +153,24 @@ export default async function ProcessPage() {
           The chain is enforced in the database, not just the UI: the gates above are triggers, so a PO without an approved
           quotation, an invoice without a cleared PDI, or a commission before payment all fail even if called directly.
         </p>
+      </section>
+
+      <section className="mt-6">
+        <h2 className="text-lg font-bold">Business flow rules</h2>
+        <p className="mt-1 text-sm text-muted-ink">
+          The rules the chain must never break, each enforced by a database trigger or constraint and covered by a SQL test.
+        </p>
+        <ul className="mt-3 space-y-2">
+          {businessRules.map((rule) => (
+            <li key={rule.rule} className="panel p-3">
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <p className="font-medium">{rule.rule}</p>
+                <span className="mono text-xs text-muted-ink">{rule.enforced}</span>
+              </div>
+              <p className="mt-1 text-sm text-muted-ink">{rule.detail}</p>
+            </li>
+          ))}
+        </ul>
       </section>
     </AppShell>
   );

@@ -99,6 +99,12 @@ export async function recordPaymentAction(
     .eq("oem_invoice_id", input.oem_invoice_id);
   const priorTotal = (priorRows ?? []).reduce((sum, row) => sum + Number(row.amount_received), 0);
   const gross = Number(invoice.gross_amount);
+  const outstanding = round2(Math.max(gross - priorTotal, 0));
+  if (input.amount_received > outstanding) {
+    return {
+      error: `Payment exceeds the invoice balance. Outstanding is ${outstanding} against a gross of ${gross}.`,
+    };
+  }
   const newTotal = round2(priorTotal + input.amount_received);
   const balance = round2(Math.max(gross - newTotal, 0));
 
@@ -198,12 +204,19 @@ export async function recordDeliveryAction(
     .select("quantity_invoiced")
     .eq("id", input.oem_invoice_id)
     .maybeSingle();
+  if (!invoice) return { error: "Invoice not found." };
   const { data: priorRows } = await supabase
     .from("deliveries")
     .select("quantity_delivered")
     .eq("oem_invoice_id", input.oem_invoice_id);
   const priorTotal = (priorRows ?? []).reduce((sum, row) => sum + Number(row.quantity_delivered), 0);
-  const invoiced = invoice ? Number(invoice.quantity_invoiced) : 0;
+  const invoiced = Number(invoice.quantity_invoiced);
+  const outstanding = round2(Math.max(invoiced - priorTotal, 0));
+  if (input.quantity_delivered > outstanding) {
+    return {
+      error: `Delivery exceeds the invoice balance. Outstanding is ${outstanding} against ${invoiced} invoiced.`,
+    };
+  }
   const pending = round2(Math.max(invoiced - (priorTotal + input.quantity_delivered), 0));
 
   const { error } = await supabase.from("deliveries").insert({
